@@ -5,7 +5,7 @@ import { ArrowLeft, CarFront } from "lucide-react";
 
 import { getCurrentUser } from "../../../lib/auth";
 import { hasPermission } from "../../../lib/permissions";
-import VehicleManager from "./VehicleManager";
+import VehicleAdminPanel from "./VehicleAdminPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +19,8 @@ export default async function AdminVehiclesPage() {
   if (!hasPermission(user.role, "vehicles.view")) {
     redirect("/acesso-negado");
   }
+
+  const canCreate = hasPermission(user.role, "vehicles.create");
 
   return (
     <main className="min-h-screen bg-[#F4F7FB]">
@@ -60,12 +62,12 @@ export default async function AdminVehiclesPage() {
           </h2>
 
           <p className="mt-3 max-w-2xl text-sm leading-6 text-[#64748B]">
-            Administre as fotografias do estoque, envie novas imagens
-            e organize a galeria de cada veículo.
+            Cadastre veículos, gerencie os anúncios do estoque e
+            administre as fotografias de cada automóvel.
           </p>
         </div>
 
-        <VehicleManager />
+        <VehicleAdminPanel canCreate={canCreate} />
 
         <footer className="mt-12 border-t border-[#E1E8F0] py-6 text-center">
           <p className="text-xs font-semibold tracking-wide text-[#64748B]">
