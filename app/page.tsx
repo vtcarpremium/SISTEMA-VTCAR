@@ -657,14 +657,30 @@ export default async function Home({
             VTCAR PREMIUM
           </p>
 
-          <h2 className="mt-4 max-w-2xl text-3xl font-black sm:text-4xl">
+          <h2 className="mt-4 max-w-2xl text-3xl font-black leading-tight text-white sm:text-4xl">
             Movemos você em direção às suas conquistas.
           </h2>
 
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-white/65">
-            Uma experiência automotiva moderna, com atendimento próximo e
-            compromisso com cada negociação.
-          </p>
+          <div className="mt-6 max-w-3xl space-y-4 text-sm leading-7 text-white sm:text-base">
+            <p>
+              A VTCAR PREMIUM é uma marca dedicada ao mercado automotivo,
+              criada para aproximar pessoas de boas oportunidades e tornar
+              a busca pelo próximo veículo uma experiência mais simples,
+              prática e agradável.
+            </p>
+
+            <p>
+              Acreditamos que cada conquista começa com uma boa escolha.
+              Por isso, valorizamos o atendimento próximo, a transparência
+              nas informações e o respeito em cada negociação.
+            </p>
+
+            <p>
+              Mais do que apresentar veículos, queremos construir
+              relacionamentos de confiança e ajudar cada cliente a encontrar
+              o caminho certo para sua próxima conquista.
+            </p>
+          </div>
         </div>
       </section>
 
