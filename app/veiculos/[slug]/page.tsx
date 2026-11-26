@@ -14,8 +14,10 @@ import {
   ShieldCheck,
   CheckCircle2,
 } from "lucide-react";
+
 import { query } from "../../../lib/db";
 import { createImageDownloadUrl } from "../../../lib/storage";
+import VehicleGallery from "./VehicleGallery";
 
 export const dynamic = "force-dynamic";
 
@@ -111,11 +113,15 @@ function Specification({
       <div className="rounded-lg bg-[#EAF4FF] p-3">
         <Icon size={20} className="text-[#1677D2]" />
       </div>
+
       <div>
         <p className="text-[10px] font-semibold uppercase tracking-wide text-[#8293A7]">
           {label}
         </p>
-        <p className="mt-1 text-sm font-bold text-[#071B35]">{value}</p>
+
+        <p className="mt-1 text-sm font-bold text-[#071B35]">
+          {value}
+        </p>
       </div>
     </div>
   );
@@ -127,11 +133,13 @@ export default async function VehiclePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+
   const vehicle = await getVehicle(slug);
 
   if (!vehicle) notFound();
 
   const images = await getImages(vehicle.id);
+
   const validImages = images.filter(
     (image) => Boolean(image.image_url)
   );
@@ -148,6 +156,7 @@ export default async function VehiclePage({
             <span className="text-2xl font-black text-white">
               VT<span className="text-[#55B8FF]">CAR</span>
             </span>
+
             <span className="mt-1 text-[9px] font-bold tracking-[0.36em] text-[#B9D8F5]">
               PREMIUM
             </span>
@@ -168,11 +177,18 @@ export default async function VehiclePage({
           <Link href="/" className="hover:text-[#1677D2]">
             Início
           </Link>
+
           <span>/</span>
-          <Link href="/#estoque" className="hover:text-[#1677D2]">
+
+          <Link
+            href="/#estoque"
+            className="hover:text-[#1677D2]"
+          >
             Estoque
           </Link>
+
           <span>/</span>
+
           <span className="font-semibold text-[#123B68]">
             {vehicle.model}
           </span>
@@ -180,78 +196,61 @@ export default async function VehiclePage({
 
         <div className="grid items-start gap-7 lg:grid-cols-[1fr_380px]">
           <section>
-            <div className="overflow-hidden rounded-2xl border border-[#E1E8F0] bg-white">
-              <div className="relative flex aspect-[16/10] items-center justify-center bg-[#EAF0F6]">
-                {validImages.length > 0 ? (
-                  <img
-                    src={validImages[0].image_url!}
-                    alt={validImages[0].alt_text || vehicle.title}
-                    className="h-full w-full object-contain"
-                  />
-                ) : (
-                  <CarFront
-                    size={100}
-                    strokeWidth={1}
-                    className="text-[#9CB1C7]"
-                  />
-                )}
+            {/* GALERIA INTERATIVA */}
+            <VehicleGallery
+              images={validImages}
+              title={vehicle.title}
+            />
 
-                <span className="absolute left-4 top-4 rounded-lg bg-[#1677D2] px-3 py-2 text-[10px] font-bold text-white">
-                  VTCAR PREMIUM
-                </span>
-              </div>
-
-              {validImages.length > 1 && (
-                <div className="grid grid-cols-4 gap-2 p-3 sm:grid-cols-5">
-                  {validImages.slice(1, 6).map((image) => (
-                    <div
-                      key={image.id}
-                      className="aspect-[4/3] overflow-hidden rounded-lg bg-[#EAF0F6]"
-                    >
-                      <img
-                        src={image.image_url!}
-                        alt={image.alt_text || vehicle.title}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
+            {/* FICHA TÉCNICA */}
             <div className="mt-6 rounded-2xl border border-[#E1E8F0] bg-white p-6">
               <h2 className="text-xl font-black text-[#071B35]">
                 Ficha técnica
               </h2>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <Specification icon={CarFront} label="Marca" value={vehicle.brand} />
-                <Specification icon={CarFront} label="Modelo" value={vehicle.model} />
+                <Specification
+                  icon={CarFront}
+                  label="Marca"
+                  value={vehicle.brand}
+                />
+
+                <Specification
+                  icon={CarFront}
+                  label="Modelo"
+                  value={vehicle.model}
+                />
+
                 <Specification
                   icon={CalendarDays}
                   label="Ano"
                   value={`${vehicle.manufacture_year}/${vehicle.model_year}`}
                 />
+
                 <Specification
                   icon={Gauge}
                   label="Quilometragem"
                   value={`${Number(vehicle.mileage).toLocaleString("pt-BR")} km`}
                 />
+
                 <Specification
                   icon={Settings2}
                   label="Câmbio"
                   value={vehicle.transmission || "Consulte"}
                 />
+
                 <Specification
                   icon={Fuel}
                   label="Combustível"
                   value={vehicle.fuel_type || "Consulte"}
                 />
+
                 <Specification
                   icon={CarFront}
                   label="Cor"
                   value={vehicle.color || "Consulte"}
                 />
+
                 <Specification
                   icon={ShieldCheck}
                   label="Versão"
@@ -260,11 +259,13 @@ export default async function VehiclePage({
               </div>
             </div>
 
+            {/* DESCRIÇÃO */}
             {vehicle.description && (
               <div className="mt-6 rounded-2xl border border-[#E1E8F0] bg-white p-6">
                 <h2 className="text-xl font-black text-[#071B35]">
                   Sobre este veículo
                 </h2>
+
                 <p className="mt-4 whitespace-pre-line text-sm leading-7 text-[#64748B]">
                   {vehicle.description}
                 </p>
@@ -272,6 +273,7 @@ export default async function VehiclePage({
             )}
           </section>
 
+          {/* INFORMAÇÕES E CONTATO */}
           <aside className="lg:sticky lg:top-6">
             <div className="rounded-2xl border border-[#E1E8F0] bg-white p-6 shadow-sm">
               <p className="text-xs font-bold uppercase tracking-widest text-[#1677D2]">
@@ -292,6 +294,7 @@ export default async function VehiclePage({
                 <p className="text-xs font-medium text-[#8293A7]">
                   PREÇO DO VEÍCULO
                 </p>
+
                 <p className="mt-2 text-3xl font-black text-[#123B68]">
                   {money(vehicle.price)}
                 </p>
@@ -302,10 +305,15 @@ export default async function VehiclePage({
                   <Gauge size={17} className="text-[#1677D2]" />
                   {Number(vehicle.mileage).toLocaleString("pt-BR")} km
                 </div>
+
                 <div className="flex items-center gap-3">
-                  <CalendarDays size={17} className="text-[#1677D2]" />
+                  <CalendarDays
+                    size={17}
+                    className="text-[#1677D2]"
+                  />
                   Ano {vehicle.manufacture_year}/{vehicle.model_year}
                 </div>
+
                 <div className="flex items-center gap-3">
                   <MapPin size={17} className="text-[#1677D2]" />
                   Consulte a localização
@@ -335,9 +343,10 @@ export default async function VehiclePage({
                   size={19}
                   className="mt-0.5 shrink-0 text-[#1677D2]"
                 />
+
                 <p className="text-[11px] leading-5 text-[#64748B]">
-                  Entre em contato com nossa equipe para confirmar disponibilidade,
-                  condições e informações do veículo.
+                  Entre em contato com nossa equipe para confirmar
+                  disponibilidade, condições e informações do veículo.
                 </p>
               </div>
             </div>
@@ -349,6 +358,7 @@ export default async function VehiclePage({
         <p className="font-bold tracking-widest text-white">
           VTCAR PREMIUM
         </p>
+
         <p className="mt-2 text-[10px] tracking-[0.2em] text-[#B9D8F5]">
           MOVEMOS CONQUISTAS
         </p>
