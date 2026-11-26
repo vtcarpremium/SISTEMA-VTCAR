@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
       VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9,
         $10, $11, $12, $13, $14, $15,
-        CASE WHEN $14 = 'published' THEN NOW() ELSE NULL END,
+        CASE WHEN $14::varchar = 'published' THEN NOW() ELSE NULL END,
         $16, $16
       )
       RETURNING *`,
