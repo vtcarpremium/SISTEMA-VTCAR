@@ -80,6 +80,37 @@ const inputClass =
 const labelClass =
   "mb-2 block text-sm font-semibold text-[#071B35]";
 
+function parseBrazilianPrice(value: string): number {
+  let normalized = value
+    .trim()
+    .replace(/R\$/gi, "")
+    .replace(/\s/g, "");
+
+  if (!normalized) return NaN;
+
+  if (normalized.includes(",")) {
+    normalized = normalized
+      .replace(/\./g, "")
+      .replace(",", ".");
+  } else if (/^\d{1,3}(\.\d{3})+$/.test(normalized)) {
+    normalized = normalized.replace(/\./g, "");
+  }
+
+  const price = Number(normalized);
+  return Number.isFinite(price) ? price : NaN;
+}
+
+function formatBrazilianPrice(value: number | string): string {
+  const numericValue = Number(value);
+
+  if (!Number.isFinite(numericValue)) return "";
+
+  return numericValue.toLocaleString("pt-BR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
+}
+
 export default function VehicleManager() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState("");
@@ -164,7 +195,7 @@ export default function VehicleManager() {
       version: vehicle.version || "",
       manufactureYear: String(vehicle.manufacture_year ?? ""),
       modelYear: String(vehicle.model_year ?? ""),
-      price: String(vehicle.price ?? ""),
+      price: formatBrazilianPrice(vehicle.price ?? 0),
       mileage: String(vehicle.mileage ?? ""),
       transmission: vehicle.transmission || "",
       fuelType: vehicle.fuel_type || "",
@@ -211,7 +242,7 @@ export default function VehicleManager() {
 
     if (!selectedVehicle) return;
 
-    const price = Number(form.price.replace(",", "."));
+    const price = parseBrazilianPrice(form.price);
     const manufactureYear = Number(form.manufactureYear);
     const modelYear = Number(form.modelYear);
     const mileage = Number(form.mileage);
@@ -224,6 +255,7 @@ export default function VehicleManager() {
     if (
       !Number.isFinite(price) ||
       price <= 0 ||
+      price > 100000000 ||
       !Number.isInteger(manufactureYear) ||
       !Number.isInteger(modelYear) ||
       !Number.isInteger(mileage) ||
@@ -231,7 +263,8 @@ export default function VehicleManager() {
       modelYear < 1900 ||
       manufactureYear > 2100 ||
       modelYear > 2100 ||
-      mileage < 0
+      mileage < 0 ||
+      mileage > 10000000
     ) {
       setError("Confira o preço, os anos e a quilometragem informados.");
       return;
@@ -589,13 +622,16 @@ export default function VehicleManager() {
                   <label className={labelClass}>Preço (R$) *</label>
                   <input
                     className={inputClass}
-                    type="number"
-                    min="0.01"
-                    step="0.01"
+                    type="text"
+                    inputMode="decimal"
                     value={form.price}
                     onChange={(e) => updateForm("price", e.target.value)}
                     required
+                    placeholder="125.000,00"
                   />
+                  <p className="mt-1 text-xs text-[#64748B]">
+                    Ex.: 125.000 ou 125.000,00
+                  </p>
                 </div>
 
                 <div>
