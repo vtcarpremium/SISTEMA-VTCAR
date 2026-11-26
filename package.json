@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "prestart": "node scripts/init-db.mjs",
-    "start": "next start"
+    "start": "node scripts/init-db.mjs && next start"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
