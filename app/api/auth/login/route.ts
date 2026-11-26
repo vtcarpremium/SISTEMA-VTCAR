@@ -1,10 +1,10 @@
 
 import { NextRequest, NextResponse } from "next/server";
-import { pool } from "@/lib/db";
+import { pool } from "../../../../lib/db";
 import {
   createSession,
   verifyPassword,
-} from "@/lib/auth";
+} from "../../../../lib/auth";
 
 export const runtime = "nodejs";
 
@@ -88,10 +88,7 @@ export async function POST(request: NextRequest) {
       await client.query("COMMIT");
 
       return NextResponse.json(
-        {
-          error:
-            "Acesso temporariamente bloqueado. Tente novamente mais tarde.",
-        },
+        { error: "Acesso temporariamente bloqueado." },
         { status: 429 }
       );
     }
@@ -117,10 +114,7 @@ export async function POST(request: NextRequest) {
         await client.query("COMMIT");
 
         return NextResponse.json(
-          {
-            error:
-              "Muitas tentativas. Acesso bloqueado por 15 minutos.",
-          },
+          { error: "Muitas tentativas. Tente novamente em 15 minutos." },
           { status: 429 }
         );
       }
