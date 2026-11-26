@@ -1,6 +1,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "../../../../lib/db";
+import { writeAuditLog } from "../../../../lib/audit";
 import {
   requirePermission,
   AuthorizationError,
@@ -26,6 +27,21 @@ function isValidText(value: unknown, maxLength: number): value is string {
     value.trim().length > 0 &&
     value.trim().length <= maxLength
   );
+}
+
+function optionalText(
+  value: unknown,
+  maxLength: number
+): string | null {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+
+  if (typeof value !== "string" || value.length > maxLength) {
+    throw new Error("INVALID_OPTIONAL_FIELD");
+  }
+
+  return value.trim();
 }
 
 export async function GET() {
@@ -57,7 +73,10 @@ export async function GET() {
     console.error("Erro ao consultar veículos:", error);
 
     return NextResponse.json(
-      { success: false, message: "Não foi possível consultar os veículos." },
+      {
+        success: false,
+        message: "Não foi possível consultar os veículos.",
+      },
       { status: 500 }
     );
   }
@@ -66,7 +85,6 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const user = await requirePermission("vehicles.create");
-
     const body = await request.json();
 
     const {
@@ -95,7 +113,10 @@ export async function POST(request: NextRequest) {
 
     if (!isValidText(brand, 80) || !isValidText(model, 100)) {
       return NextResponse.json(
-        { success: false, message: "Marca e modelo são obrigatórios." },
+        {
+          success: false,
+          message: "Marca e modelo são obrigatórios.",
+        },
         { status: 400 }
       );
     }
@@ -109,7 +130,10 @@ export async function POST(request: NextRequest) {
       modelYear > 2100
     ) {
       return NextResponse.json(
-        { success: false, message: "Informe os anos de fabricação e modelo corretamente." },
+        {
+          success: false,
+          message: "Informe os anos de fabricação e modelo corretamente.",
+        },
         { status: 400 }
       );
     }
@@ -137,8 +161,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const vehicleStatus =
-      status === undefined ? "draft" : status;
+    const vehicleStatus = status === undefined ? "draft" : status;
 
     if (!vehicleStatuses.includes(vehicleStatus)) {
       return NextResponse.json(
@@ -149,22 +172,13 @@ export async function POST(request: NextRequest) {
 
     if (featured !== undefined && typeof featured !== "boolean") {
       return NextResponse.json(
-        { success: false, message: "O campo de destaque deve ser verdadeiro ou falso." },
+        {
+          success: false,
+          message: "O campo de destaque deve ser verdadeiro ou falso.",
+        },
         { status: 400 }
       );
     }
-
-    const optionalText = (value: unknown, maxLength: number) => {
-      if (value === undefined || value === null || value === "") {
-        return null;
-      }
-
-      if (typeof value !== "string" || value.length > maxLength) {
-        throw new Error("INVALID_OPTIONAL_FIELD");
-      }
-
-      return value.trim();
-    };
 
     let safeVersion: string | null;
     let safeTransmission: string | null;
@@ -180,7 +194,10 @@ export async function POST(request: NextRequest) {
       safeDescription = optionalText(description, 5000);
     } catch {
       return NextResponse.json(
-        { success: false, message: "Um dos campos de texto excede o limite permitido." },
+        {
+          success: false,
+          message: "Um dos campos de texto excede o limite permitido.",
+        },
         { status: 400 }
       );
     }
@@ -235,11 +252,35 @@ export async function POST(request: NextRequest) {
       ]
     );
 
+    const vehicle = result.rows[0];
+
+    try {
+      await writeAuditLog({
+        userId: user.id,
+        action: "vehicle.created",
+        entity: "vehicle",
+        entityId: vehicle.id,
+        details: {
+          title: vehicle.title,
+          brand: vehicle.brand,
+          model: vehicle.model,
+          status: vehicle.status,
+        },
+        ipAddress: request.headers.get("x-forwarded-for"),
+        userAgent: request.headers.get("user-agent"),
+      });
+    } catch (auditError) {
+      console.error(
+        "Falha ao registrar auditoria do veículo:",
+        auditError
+      );
+    }
+
     return NextResponse.json(
       {
         success: true,
         message: "Veículo cadastrado com sucesso.",
-        vehicle: result.rows[0],
+        vehicle,
       },
       { status: 201 }
     );
@@ -254,7 +295,10 @@ export async function POST(request: NextRequest) {
     console.error("Erro ao cadastrar veículo:", error);
 
     return NextResponse.json(
-      { success: false, message: "Não foi possível cadastrar o veículo." },
+      {
+        success: false,
+        message: "Não foi possível cadastrar o veículo.",
+      },
       { status: 500 }
     );
   }
