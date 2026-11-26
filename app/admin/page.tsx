@@ -1,5 +1,6 @@
 
 import type { ElementType } from "react";
+import Link from "next/link";
 import {
   CarFront,
   Users,
@@ -82,6 +83,7 @@ export default async function AdminPage() {
       title: "Veículos",
       description: "Cadastre, edite e publique os veículos do estoque.",
       icon: CarFront,
+      href: "/admin/veiculos",
     },
     {
       title: "Leads",
@@ -308,9 +310,21 @@ export default async function AdminPage() {
                   {item.description}
                 </p>
 
-                <div className="mt-4 flex items-center justify-between border-t border-[#E1E8F0] pt-4 text-xs font-medium text-[#64748B]">
-                  Em desenvolvimento
-                  <ArrowUpRight size={15} className="text-[#1677D2]" />
+                <div className="mt-4 border-t border-[#E1E8F0] pt-4 text-xs font-medium">
+                  {item.href ? (
+                    <Link
+                      href={item.href}
+                      className="flex items-center justify-between text-[#1677D2] transition hover:text-[#071B35]"
+                    >
+                      Gerenciar veículos
+                      <ArrowUpRight size={15} />
+                    </Link>
+                  ) : (
+                    <div className="flex items-center justify-between text-[#64748B]">
+                      Em desenvolvimento
+                      <ArrowUpRight size={15} className="text-[#1677D2]" />
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
