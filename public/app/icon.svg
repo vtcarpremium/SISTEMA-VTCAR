@@ -1,0 +1,44 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#F6D99A"/>
+      <stop offset=".5" stop-color="#C6A15B"/>
+      <stop offset="1" stop-color="#8B5A24"/>
+    </linearGradient>
+    <linearGradient id="orange" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FF9A32"/>
+      <stop offset="1" stop-color="#D95700"/>
+    </linearGradient>
+    <linearGradient id="silver" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#8B929B"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="100" fill="#090909"/>
+  <path d="M256 35 L430 83 L416 300 Q390 390 256 465 Q122 390 96 300 L82 83 Z"
+        stroke="url(#gold)" stroke-width="12"/>
+  <path d="M256 55 L410 98 L398 291 Q374 367 256 431 Q138 367 114 291 L102 98 Z"
+        stroke="#49371D" stroke-width="4"/>
+
+  <!-- Carro -->
+  <path d="M139 224 L177 177 Q190 160 220 157 L292 157 Q322 160 341 179 L373 224"
+        stroke="url(#silver)" stroke-width="12" stroke-linecap="round"/>
+  <path d="M145 228 L190 207 L321 207 L367 228 L348 257 L164 257 Z"
+        fill="#17191D" stroke="url(#orange)" stroke-width="8"/>
+  <path d="M154 228 L188 220 L205 220" stroke="#FF6B00" stroke-width="8"/>
+  <path d="M358 228 L324 220 L307 220" stroke="#FF6B00" stroke-width="8"/>
+
+  <!-- Letras -->
+  <text x="256" y="340" text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="112" font-weight="900" letter-spacing="-8">
+    <tspan fill="url(#silver)">VT</tspan><tspan fill="url(#orange)">C</tspan>
+  </text>
+  <path d="M166 375 H346" stroke="url(#gold)" stroke-width="5"/>
+  <text x="256" y="409" text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="25" font-weight="700" letter-spacing="8"
+        fill="url(#gold)">PREMIUM</text>
+</svg>
