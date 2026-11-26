@@ -32,6 +32,27 @@ const inputClass =
 const labelClass =
   "mb-2 block text-sm font-semibold text-[#071B35]";
 
+function parseBrazilianPrice(value: string): number {
+  let normalized = value
+    .trim()
+    .replace(/R\$/gi, "")
+    .replace(/\s/g, "");
+
+  if (!normalized) return NaN;
+
+  if (normalized.includes(",")) {
+    normalized = normalized
+      .replace(/\./g, "")
+      .replace(",", ".");
+  } else if (/^\d{1,3}(\.\d{3})+$/.test(normalized)) {
+    normalized = normalized.replace(/\./g, "");
+  }
+
+  const result = Number(normalized);
+
+  return Number.isFinite(result) ? result : NaN;
+}
+
 export default function VehicleCreateForm({
   onCreated,
   onCancel,
@@ -56,7 +77,7 @@ export default function VehicleCreateForm({
     event.preventDefault();
     setError("");
 
-    const price = Number(form.price.replace(",", "."));
+    const price = parseBrazilianPrice(form.price);
     const manufactureYear = Number(form.manufactureYear);
     const modelYear = Number(form.modelYear);
     const mileage = Number(form.mileage);
@@ -216,9 +237,7 @@ export default function VehicleCreateForm({
               min="1900"
               max="2100"
               value={form.manufactureYear}
-              onChange={(e) =>
-                update("manufactureYear", e.target.value)
-              }
+              onChange={(e) => update("manufactureYear", e.target.value)}
               required
               placeholder="2024"
             />
@@ -242,15 +261,16 @@ export default function VehicleCreateForm({
             <label className={labelClass}>Preço (R$) *</label>
             <input
               className={inputClass}
-              type="number"
-              min="0.01"
-              max="100000000"
-              step="0.01"
+              type="text"
+              inputMode="decimal"
               value={form.price}
               onChange={(e) => update("price", e.target.value)}
               required
-              placeholder="125000"
+              placeholder="125.000,00"
             />
+            <p className="mt-1 text-xs text-[#64748B]">
+              Aceita 125.000, 125000 ou 125.000,00.
+            </p>
           </div>
 
           <div>
