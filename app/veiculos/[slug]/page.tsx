@@ -15,6 +15,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { query } from "../../../lib/db";
+import { createImageDownloadUrl } from "../../../lib/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +38,8 @@ type Vehicle = {
 
 type VehicleImage = {
   id: string;
-  image_url: string;
+  image_url: string | null;
+  storage_key: string | null;
   alt_text: string | null;
   position: number;
   is_cover: boolean;
@@ -59,14 +61,32 @@ async function getVehicle(slug: string) {
 
 async function getImages(vehicleId: string) {
   const result = await query<VehicleImage>(
-    `SELECT id, image_url, alt_text, position, is_cover
+    `SELECT id, image_url, storage_key, alt_text, position, is_cover
      FROM vehicle_images
      WHERE vehicle_id = $1
-     ORDER BY is_cover DESC, position ASC`,
+     ORDER BY is_cover DESC, position ASC, created_at ASC`,
     [vehicleId]
   );
 
-  return result.rows;
+  return Promise.all(
+    result.rows.map(async (image) => {
+      let imageUrl: string | null = null;
+
+      if (image.storage_key) {
+        imageUrl = await createImageDownloadUrl(image.storage_key);
+      } else if (
+        image.image_url &&
+        !image.image_url.startsWith("storage://")
+      ) {
+        imageUrl = image.image_url;
+      }
+
+      return {
+        ...image,
+        image_url: imageUrl,
+      };
+    })
+  );
 }
 
 function money(value: number | string) {
@@ -112,6 +132,9 @@ export default async function VehiclePage({
   if (!vehicle) notFound();
 
   const images = await getImages(vehicle.id);
+  const validImages = images.filter(
+    (image) => Boolean(image.image_url)
+  );
 
   const whatsappMessage = encodeURIComponent(
     `Olá! Tenho interesse no veículo ${vehicle.title}. Gostaria de receber mais informações.`
@@ -142,25 +165,35 @@ export default async function VehiclePage({
 
       <div className="mx-auto max-w-7xl px-5 py-7">
         <div className="mb-6 flex flex-wrap items-center gap-2 text-xs text-[#64748B]">
-          <Link href="/" className="hover:text-[#1677D2]">Início</Link>
+          <Link href="/" className="hover:text-[#1677D2]">
+            Início
+          </Link>
           <span>/</span>
-          <Link href="/#estoque" className="hover:text-[#1677D2]">Estoque</Link>
+          <Link href="/#estoque" className="hover:text-[#1677D2]">
+            Estoque
+          </Link>
           <span>/</span>
-          <span className="font-semibold text-[#123B68]">{vehicle.model}</span>
+          <span className="font-semibold text-[#123B68]">
+            {vehicle.model}
+          </span>
         </div>
 
         <div className="grid items-start gap-7 lg:grid-cols-[1fr_380px]">
           <section>
             <div className="overflow-hidden rounded-2xl border border-[#E1E8F0] bg-white">
               <div className="relative flex aspect-[16/10] items-center justify-center bg-[#EAF0F6]">
-                {images.length > 0 ? (
+                {validImages.length > 0 ? (
                   <img
-                    src={images[0].image_url}
-                    alt={images[0].alt_text || vehicle.title}
-                    className="h-full w-full object-cover"
+                    src={validImages[0].image_url!}
+                    alt={validImages[0].alt_text || vehicle.title}
+                    className="h-full w-full object-contain"
                   />
                 ) : (
-                  <CarFront size={100} strokeWidth={1} className="text-[#9CB1C7]" />
+                  <CarFront
+                    size={100}
+                    strokeWidth={1}
+                    className="text-[#9CB1C7]"
+                  />
                 )}
 
                 <span className="absolute left-4 top-4 rounded-lg bg-[#1677D2] px-3 py-2 text-[10px] font-bold text-white">
@@ -168,15 +201,15 @@ export default async function VehiclePage({
                 </span>
               </div>
 
-              {images.length > 1 && (
+              {validImages.length > 1 && (
                 <div className="grid grid-cols-4 gap-2 p-3 sm:grid-cols-5">
-                  {images.slice(1, 6).map((image) => (
+                  {validImages.slice(1, 6).map((image) => (
                     <div
                       key={image.id}
                       className="aspect-[4/3] overflow-hidden rounded-lg bg-[#EAF0F6]"
                     >
                       <img
-                        src={image.image_url}
+                        src={image.image_url!}
                         alt={image.alt_text || vehicle.title}
                         className="h-full w-full object-cover"
                       />
@@ -194,12 +227,36 @@ export default async function VehiclePage({
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <Specification icon={CarFront} label="Marca" value={vehicle.brand} />
                 <Specification icon={CarFront} label="Modelo" value={vehicle.model} />
-                <Specification icon={CalendarDays} label="Ano" value={`${vehicle.manufacture_year}/${vehicle.model_year}`} />
-                <Specification icon={Gauge} label="Quilometragem" value={`${Number(vehicle.mileage).toLocaleString("pt-BR")} km`} />
-                <Specification icon={Settings2} label="Câmbio" value={vehicle.transmission || "Consulte"} />
-                <Specification icon={Fuel} label="Combustível" value={vehicle.fuel_type || "Consulte"} />
-                <Specification icon={CarFront} label="Cor" value={vehicle.color || "Consulte"} />
-                <Specification icon={ShieldCheck} label="Versão" value={vehicle.version || "Consulte"} />
+                <Specification
+                  icon={CalendarDays}
+                  label="Ano"
+                  value={`${vehicle.manufacture_year}/${vehicle.model_year}`}
+                />
+                <Specification
+                  icon={Gauge}
+                  label="Quilometragem"
+                  value={`${Number(vehicle.mileage).toLocaleString("pt-BR")} km`}
+                />
+                <Specification
+                  icon={Settings2}
+                  label="Câmbio"
+                  value={vehicle.transmission || "Consulte"}
+                />
+                <Specification
+                  icon={Fuel}
+                  label="Combustível"
+                  value={vehicle.fuel_type || "Consulte"}
+                />
+                <Specification
+                  icon={CarFront}
+                  label="Cor"
+                  value={vehicle.color || "Consulte"}
+                />
+                <Specification
+                  icon={ShieldCheck}
+                  label="Versão"
+                  value={vehicle.version || "Consulte"}
+                />
               </div>
             </div>
 
@@ -226,7 +283,9 @@ export default async function VehiclePage({
               </h1>
 
               {vehicle.version && (
-                <p className="mt-2 text-sm text-[#64748B]">{vehicle.version}</p>
+                <p className="mt-2 text-sm text-[#64748B]">
+                  {vehicle.version}
+                </p>
               )}
 
               <div className="my-6 border-y border-[#E1E8F0] py-5">
@@ -272,7 +331,10 @@ export default async function VehiclePage({
               </a>
 
               <div className="mt-6 flex items-start gap-3 rounded-xl bg-[#F4F7FB] p-4">
-                <CheckCircle2 size={19} className="mt-0.5 shrink-0 text-[#1677D2]" />
+                <CheckCircle2
+                  size={19}
+                  className="mt-0.5 shrink-0 text-[#1677D2]"
+                />
                 <p className="text-[11px] leading-5 text-[#64748B]">
                   Entre em contato com nossa equipe para confirmar disponibilidade,
                   condições e informações do veículo.
@@ -284,7 +346,9 @@ export default async function VehiclePage({
       </div>
 
       <footer className="mt-12 bg-[#071B35] px-5 py-8 text-center text-xs text-white/60">
-        <p className="font-bold tracking-widest text-white">VTCAR PREMIUM</p>
+        <p className="font-bold tracking-widest text-white">
+          VTCAR PREMIUM
+        </p>
         <p className="mt-2 text-[10px] tracking-[0.2em] text-[#B9D8F5]">
           MOVEMOS CONQUISTAS
         </p>
