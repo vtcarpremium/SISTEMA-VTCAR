@@ -10,6 +10,8 @@ import {
   CarFront,
   Upload,
   Images,
+  Save,
+  Pencil,
 } from "lucide-react";
 
 type Vehicle = {
@@ -17,8 +19,17 @@ type Vehicle = {
   title: string;
   brand: string;
   model: string;
+  version: string | null;
   manufacture_year: number;
   model_year: number;
+  price: number | string;
+  mileage: number;
+  transmission: string | null;
+  fuel_type: string | null;
+  color: string | null;
+  description: string | null;
+  status: "draft" | "published" | "paused" | "sold";
+  featured: boolean;
 };
 
 type VehicleImage = {
@@ -29,15 +40,59 @@ type VehicleImage = {
   is_cover: boolean;
 };
 
+type VehicleForm = {
+  title: string;
+  brand: string;
+  model: string;
+  version: string;
+  manufactureYear: string;
+  modelYear: string;
+  price: string;
+  mileage: string;
+  transmission: string;
+  fuelType: string;
+  color: string;
+  description: string;
+  status: Vehicle["status"];
+  featured: boolean;
+};
+
+const emptyForm: VehicleForm = {
+  title: "",
+  brand: "",
+  model: "",
+  version: "",
+  manufactureYear: "",
+  modelYear: "",
+  price: "",
+  mileage: "",
+  transmission: "",
+  fuelType: "",
+  color: "",
+  description: "",
+  status: "draft",
+  featured: false,
+};
+
+const inputClass =
+  "w-full rounded-xl border border-[#CBD5E1] bg-white px-4 py-3 text-sm text-[#071B35] outline-none transition focus:border-[#1677D2] focus:ring-2 focus:ring-[#1677D2]/20";
+
+const labelClass =
+  "mb-2 block text-sm font-semibold text-[#071B35]";
+
 export default function VehicleManager() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState("");
   const [images, setImages] = useState<VehicleImage[]>([]);
   const [files, setFiles] = useState<File[]>([]);
+  const [form, setForm] = useState<VehicleForm>(emptyForm);
+
   const [loadingVehicles, setLoadingVehicles] = useState(true);
   const [loadingImages, setLoadingImages] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState("");
+
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
@@ -55,7 +110,9 @@ export default function VehicleManager() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || "Não foi possível carregar os veículos.");
+        throw new Error(
+          data.message || "Não foi possível carregar os veículos."
+        );
       }
 
       setVehicles(data.vehicles || []);
@@ -75,7 +132,6 @@ export default function VehicleManager() {
     }
 
     setLoadingImages(true);
-    setError("");
 
     try {
       const response = await fetch(
@@ -100,13 +156,139 @@ export default function VehicleManager() {
     }
   }
 
+  function fillForm(vehicle: Vehicle) {
+    setForm({
+      title: vehicle.title || "",
+      brand: vehicle.brand || "",
+      model: vehicle.model || "",
+      version: vehicle.version || "",
+      manufactureYear: String(vehicle.manufacture_year ?? ""),
+      modelYear: String(vehicle.model_year ?? ""),
+      price: String(vehicle.price ?? ""),
+      mileage: String(vehicle.mileage ?? ""),
+      transmission: vehicle.transmission || "",
+      fuelType: vehicle.fuel_type || "",
+      color: vehicle.color || "",
+      description: vehicle.description || "",
+      status: vehicle.status || "draft",
+      featured: vehicle.featured === true,
+    });
+  }
+
   useEffect(() => {
     loadVehicles();
   }, []);
 
   useEffect(() => {
+    const vehicle = vehicles.find(
+      (item) => item.id === selectedVehicle
+    );
+
+    if (vehicle) {
+      fillForm(vehicle);
+    } else {
+      setForm(emptyForm);
+    }
+
+    setFiles([]);
+    setMessage("");
+    setError("");
     loadImages(selectedVehicle);
-  }, [selectedVehicle]);
+  }, [selectedVehicle, vehicles]);
+
+  function updateForm<K extends keyof VehicleForm>(
+    key: K,
+    value: VehicleForm[K]
+  ) {
+    setForm((previous) => ({
+      ...previous,
+      [key]: value,
+    }));
+  }
+
+  async function saveVehicle(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!selectedVehicle) return;
+
+    const price = Number(form.price.replace(",", "."));
+    const manufactureYear = Number(form.manufactureYear);
+    const modelYear = Number(form.modelYear);
+    const mileage = Number(form.mileage);
+
+    if (!form.title.trim() || !form.brand.trim() || !form.model.trim()) {
+      setError("Preencha o título, a marca e o modelo.");
+      return;
+    }
+
+    if (
+      !Number.isFinite(price) ||
+      price <= 0 ||
+      !Number.isInteger(manufactureYear) ||
+      !Number.isInteger(modelYear) ||
+      !Number.isInteger(mileage) ||
+      manufactureYear < 1900 ||
+      modelYear < 1900 ||
+      manufactureYear > 2100 ||
+      modelYear > 2100 ||
+      mileage < 0
+    ) {
+      setError("Confira o preço, os anos e a quilometragem informados.");
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const response = await fetch(
+        `/api/admin/vehicles/${selectedVehicle}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title: form.title.trim(),
+            brand: form.brand.trim(),
+            model: form.model.trim(),
+            version: form.version.trim() || null,
+            manufactureYear,
+            modelYear,
+            price,
+            mileage,
+            transmission: form.transmission.trim() || null,
+            fuelType: form.fuelType.trim() || null,
+            color: form.color.trim() || null,
+            description: form.description.trim() || null,
+            status: form.status,
+            featured: form.featured,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(
+          data.message || "Não foi possível salvar as alterações."
+        );
+      }
+
+      setMessage("Anúncio atualizado com sucesso!");
+
+      await loadVehicles();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro ao atualizar o anúncio."
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
 
   function handleFiles(selectedFiles: FileList | null) {
     if (!selectedFiles) return;
@@ -130,6 +312,11 @@ export default function VehicleManager() {
       return;
     }
 
+    if (images.length + selected.length > 30) {
+      setError("Cada veículo pode ter no máximo 30 fotos.");
+      return;
+    }
+
     setError("");
     setMessage("");
     setFiles(selected);
@@ -149,7 +336,10 @@ export default function VehicleManager() {
         const formData = new FormData();
 
         formData.append("file", files[index]);
-        formData.append("isCover", String(images.length === 0 && index === 0));
+        formData.append(
+          "isCover",
+          String(images.length === 0 && index === 0)
+        );
         formData.append("altText", files[index].name);
 
         const response = await fetch(
@@ -172,7 +362,10 @@ export default function VehicleManager() {
       }
 
       setFiles([]);
-      if (fileInput.current) fileInput.current.value = "";
+
+      if (fileInput.current) {
+        fileInput.current.value = "";
+      }
 
       await loadImages(selectedVehicle);
 
@@ -185,7 +378,9 @@ export default function VehicleManager() {
       await loadImages(selectedVehicle);
 
       setError(
-        err instanceof Error ? err.message : "Não foi possível enviar as fotos."
+        err instanceof Error
+          ? err.message
+          : "Não foi possível enviar as fotos."
       );
     } finally {
       setUploading(false);
@@ -243,30 +438,22 @@ export default function VehicleManager() {
               Selecionar veículo
             </h2>
             <p className="text-sm text-[#64748B]">
-              Escolha o veículo cuja galeria deseja administrar.
+              Escolha um anúncio para editar seus dados e fotografias.
             </p>
           </div>
         </div>
 
         <div className="mt-6">
-          <label
-            htmlFor="vehicle"
-            className="mb-2 block text-sm font-semibold text-[#071B35]"
-          >
+          <label htmlFor="vehicle" className={labelClass}>
             Veículo do estoque
           </label>
 
           <select
             id="vehicle"
             value={selectedVehicle}
-            onChange={(event) => {
-              setSelectedVehicle(event.target.value);
-              setFiles([]);
-              setMessage("");
-              setError("");
-            }}
+            onChange={(event) => setSelectedVehicle(event.target.value)}
             disabled={loadingVehicles}
-            className="w-full rounded-xl border border-[#CBD5E1] bg-white px-4 py-3 text-sm text-[#071B35] outline-none focus:border-[#1677D2] focus:ring-2 focus:ring-[#1677D2]/20"
+            className={inputClass}
           >
             <option value="">
               {loadingVehicles
@@ -287,11 +474,248 @@ export default function VehicleManager() {
               Nenhum veículo encontrado no estoque.
             </p>
           )}
+
+          <button
+            type="button"
+            onClick={loadVehicles}
+            disabled={loadingVehicles}
+            className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-[#1677D2] hover:text-[#123B68]"
+          >
+            <RefreshCw
+              size={14}
+              className={loadingVehicles ? "animate-spin" : ""}
+            />
+            Atualizar lista
+          </button>
         </div>
       </section>
 
       {selectedVehicle && (
         <>
+          <section className="rounded-2xl border border-[#E1E8F0] bg-white p-5 shadow-sm md:p-7">
+            <div className="mb-6 flex items-center gap-3">
+              <div className="rounded-xl bg-[#EAF4FF] p-3">
+                <Pencil className="text-[#1677D2]" size={23} />
+              </div>
+
+              <div>
+                <h2 className="text-lg font-bold text-[#071B35]">
+                  Editar anúncio
+                </h2>
+                <p className="text-sm text-[#64748B]">
+                  Altere as informações que aparecem no anúncio do veículo.
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={saveVehicle} className="space-y-6">
+              <div>
+                <label className={labelClass}>Título do anúncio *</label>
+                <input
+                  className={inputClass}
+                  value={form.title}
+                  onChange={(e) => updateForm("title", e.target.value)}
+                  maxLength={180}
+                  required
+                  placeholder="Ex.: Honda Civic Touring 1.5 Turbo"
+                />
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <div>
+                  <label className={labelClass}>Marca *</label>
+                  <input
+                    className={inputClass}
+                    value={form.brand}
+                    onChange={(e) => updateForm("brand", e.target.value)}
+                    maxLength={80}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Modelo *</label>
+                  <input
+                    className={inputClass}
+                    value={form.model}
+                    onChange={(e) => updateForm("model", e.target.value)}
+                    maxLength={100}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Versão</label>
+                  <input
+                    className={inputClass}
+                    value={form.version}
+                    onChange={(e) => updateForm("version", e.target.value)}
+                    maxLength={100}
+                    placeholder="Ex.: Touring 1.5 Turbo"
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Ano de fabricação *</label>
+                  <input
+                    className={inputClass}
+                    type="number"
+                    min="1900"
+                    max="2100"
+                    value={form.manufactureYear}
+                    onChange={(e) =>
+                      updateForm("manufactureYear", e.target.value)
+                    }
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Ano do modelo *</label>
+                  <input
+                    className={inputClass}
+                    type="number"
+                    min="1900"
+                    max="2100"
+                    value={form.modelYear}
+                    onChange={(e) =>
+                      updateForm("modelYear", e.target.value)
+                    }
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Preço (R$) *</label>
+                  <input
+                    className={inputClass}
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    value={form.price}
+                    onChange={(e) => updateForm("price", e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Quilometragem *</label>
+                  <input
+                    className={inputClass}
+                    type="number"
+                    min="0"
+                    value={form.mileage}
+                    onChange={(e) => updateForm("mileage", e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Câmbio</label>
+                  <select
+                    className={inputClass}
+                    value={form.transmission}
+                    onChange={(e) =>
+                      updateForm("transmission", e.target.value)
+                    }
+                  >
+                    <option value="">Não informado</option>
+                    <option value="Manual">Manual</option>
+                    <option value="Automático">Automático</option>
+                    <option value="CVT">CVT</option>
+                    <option value="Automatizado">Automatizado</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Combustível</label>
+                  <select
+                    className={inputClass}
+                    value={form.fuelType}
+                    onChange={(e) => updateForm("fuelType", e.target.value)}
+                  >
+                    <option value="">Não informado</option>
+                    <option value="Flex">Flex</option>
+                    <option value="Gasolina">Gasolina</option>
+                    <option value="Etanol">Etanol</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Elétrico">Elétrico</option>
+                    <option value="Híbrido">Híbrido</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Cor</label>
+                  <input
+                    className={inputClass}
+                    value={form.color}
+                    onChange={(e) => updateForm("color", e.target.value)}
+                    maxLength={60}
+                    placeholder="Ex.: Preto"
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Situação do anúncio</label>
+                  <select
+                    className={inputClass}
+                    value={form.status}
+                    onChange={(e) =>
+                      updateForm("status", e.target.value as Vehicle["status"])
+                    }
+                  >
+                    <option value="draft">Rascunho</option>
+                    <option value="published">Publicado</option>
+                    <option value="paused">Pausado</option>
+                    <option value="sold">Vendido</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>Descrição do veículo</label>
+                <textarea
+                  className={`${inputClass} min-h-36 resize-y`}
+                  value={form.description}
+                  onChange={(e) =>
+                    updateForm("description", e.target.value)
+                  }
+                  maxLength={5000}
+                  placeholder="Descreva os equipamentos, opcionais, estado de conservação e diferenciais do veículo..."
+                />
+                <p className="mt-1 text-right text-xs text-[#64748B]">
+                  {form.description.length}/5000 caracteres
+                </p>
+              </div>
+
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#CBD5E1] bg-[#F4F8FD] p-4">
+                <input
+                  type="checkbox"
+                  checked={form.featured}
+                  onChange={(e) => updateForm("featured", e.target.checked)}
+                  className="h-5 w-5 accent-[#1677D2]"
+                />
+                <span>
+                  <span className="block text-sm font-bold text-[#071B35]">
+                    Destacar este veículo
+                  </span>
+                  <span className="text-xs text-[#64748B]">
+                    Marque para dar destaque ao anúncio no portal.
+                  </span>
+                </span>
+              </label>
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1677D2] px-5 py-4 text-sm font-bold text-white transition hover:bg-[#123B68] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Save size={18} />
+                {saving ? "Salvando alterações..." : "Salvar alterações"}
+              </button>
+            </form>
+          </section>
+
           <section className="rounded-2xl border border-[#E1E8F0] bg-white p-5 shadow-sm md:p-7">
             <div className="flex items-center gap-3">
               <div className="rounded-xl bg-[#EAF4FF] p-3">
@@ -309,10 +733,7 @@ export default function VehicleManager() {
             </div>
 
             <div className="mt-6 rounded-xl border-2 border-dashed border-[#B9D8F5] bg-[#F4F8FD] p-6 text-center">
-              <ImagePlus
-                size={34}
-                className="mx-auto text-[#1677D2]"
-              />
+              <ImagePlus size={34} className="mx-auto text-[#1677D2]" />
 
               <p className="mt-3 font-semibold text-[#071B35]">
                 Selecione as fotos do veículo
@@ -414,10 +835,7 @@ export default function VehicleManager() {
               </div>
             ) : images.length === 0 ? (
               <div className="mt-6 rounded-xl bg-[#F4F7FB] px-5 py-12 text-center">
-                <Images
-                  size={35}
-                  className="mx-auto text-[#94A3B8]"
-                />
+                <Images size={35} className="mx-auto text-[#94A3B8]" />
                 <p className="mt-3 font-semibold text-[#071B35]">
                   Nenhuma foto cadastrada
                 </p>
