@@ -5,6 +5,7 @@ import {
   Settings2, ArrowUpRight, ShieldCheck, Menu,
 } from "lucide-react";
 import { query } from "../lib/db";
+import { createImageDownloadUrl } from "../lib/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,7 @@ type Vehicle = {
   fuel_type: string | null;
   color: string | null;
   cover_image: string | null;
+  cover_storage_key: string | null;
   featured: boolean;
 };
 
@@ -50,7 +52,11 @@ async function getVehicles(filters: SearchParams): Promise<Vehicle[]> {
       conditions.push(`v.brand ILIKE $${values.length}`);
     }
 
-    if (filters.preco && Number.isFinite(Number(filters.preco)) && Number(filters.preco) > 0) {
+    if (
+      filters.preco &&
+      Number.isFinite(Number(filters.preco)) &&
+      Number(filters.preco) > 0
+    ) {
       values.push(Number(filters.preco));
       conditions.push(`v.price <= $${values.length}`);
     }
@@ -69,9 +75,16 @@ async function getVehicles(filters: SearchParams): Promise<Vehicle[]> {
           SELECT vi.image_url
           FROM vehicle_images vi
           WHERE vi.vehicle_id = v.id
-          ORDER BY vi.is_cover DESC, vi.position ASC
+          ORDER BY vi.is_cover DESC, vi.position ASC, vi.created_at ASC
           LIMIT 1
-        ) AS cover_image
+        ) AS cover_image,
+        (
+          SELECT vi.storage_key
+          FROM vehicle_images vi
+          WHERE vi.vehicle_id = v.id
+          ORDER BY vi.is_cover DESC, vi.position ASC, vi.created_at ASC
+          LIMIT 1
+        ) AS cover_storage_key
       FROM vehicles v
       WHERE ${conditions.join(" AND ")}
       ORDER BY v.featured DESC, v.published_at DESC NULLS LAST
@@ -79,7 +92,33 @@ async function getVehicles(filters: SearchParams): Promise<Vehicle[]> {
       values
     );
 
-    return result.rows;
+    return await Promise.all(
+      result.rows.map(async (vehicle) => {
+        let imageUrl = vehicle.cover_image;
+
+        if (vehicle.cover_storage_key) {
+          try {
+            imageUrl = await createImageDownloadUrl(
+              vehicle.cover_storage_key
+            );
+          } catch (imageError) {
+            console.error(
+              "Erro ao gerar URL da foto do veículo:",
+              vehicle.id,
+              imageError
+            );
+            imageUrl = null;
+          }
+        } else if (imageUrl?.startsWith("storage://")) {
+          imageUrl = null;
+        }
+
+        return {
+          ...vehicle,
+          cover_image: imageUrl,
+        };
+      })
+    );
   } catch (error) {
     console.error("Erro ao consultar veículos:", error);
     return [];
@@ -299,6 +338,8 @@ export default async function Home({
                           <img
                             src={vehicle.cover_image}
                             alt={`${vehicle.brand} ${vehicle.model}`}
+                            loading="lazy"
+                            decoding="async"
                             className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                           />
                         ) : (
