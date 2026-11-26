@@ -1,12 +1,10 @@
 
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
   ArrowUpRight,
   CarFront,
   CheckCircle2,
-  ChevronRight,
   ShieldCheck,
   Star,
   MessageCircle,
@@ -83,15 +81,18 @@ function formatMileage(mileage: number) {
 
 function Logo() {
   return (
-    <Link href="/" aria-label="VTCAR PREMIUM - Início">
-      <Image
-        src="/logo.svg"
-        alt="VTCAR PREMIUM"
-        width={230}
-        height={76}
-        priority
-        className="h-auto w-[155px] sm:w-[190px]"
-      />
+    <Link href="/" aria-label="VTCAR PREMIUM - Início" className="flex items-center gap-2">
+      <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#55B8FF]/40 bg-[#123B68]">
+        <CarFront size={27} className="text-white" />
+      </span>
+      <span className="leading-none">
+        <span className="block text-2xl font-black tracking-tight text-white">
+          VT<span className="text-[#55B8FF]">CAR</span>
+        </span>
+        <span className="mt-1 block text-[9px] font-bold tracking-[0.32em] text-[#B9D8F5]">
+          PREMIUM
+        </span>
+      </span>
     </Link>
   );
 }
@@ -100,23 +101,23 @@ export default async function Home() {
   const vehicles = await getVehicles();
 
   return (
-    <main className="min-h-screen bg-[#F7F7F5] text-[#171717]">
+    <main className="min-h-screen bg-[#F4F7FB] text-[#10243D]">
       {/* CABEÇALHO */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#090909] shadow-lg">
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#071B35] shadow-lg">
         <div className="mx-auto flex min-h-[82px] max-w-[1320px] items-center justify-between gap-5 px-5 sm:px-8 lg:px-12">
           <Logo />
 
           <nav className="hidden items-center gap-8 text-sm font-medium text-white/75 lg:flex">
-            <Link href="/" className="text-[#FF6B00]">Início</Link>
-            <Link href="#estoque" className="transition hover:text-[#FF6B00]">Estoque</Link>
-            <Link href="#diferenciais" className="transition hover:text-[#FF6B00]">Por que escolher</Link>
-            <Link href="#sobre" className="transition hover:text-[#FF6B00]">Sobre nós</Link>
-            <Link href="#contato" className="transition hover:text-[#FF6B00]">Contato</Link>
+            <Link href="/" className="text-[#55B8FF]">Início</Link>
+            <Link href="#estoque" className="transition hover:text-[#55B8FF]">Estoque</Link>
+            <Link href="#diferenciais" className="transition hover:text-[#55B8FF]">Por que escolher</Link>
+            <Link href="#sobre" className="transition hover:text-[#55B8FF]">Sobre nós</Link>
+            <Link href="#contato" className="transition hover:text-[#55B8FF]">Contato</Link>
           </nav>
 
           <Link
             href="#contato"
-            className="inline-flex items-center gap-2 rounded-lg bg-[#FF6B00] px-4 py-3 text-xs font-bold text-white transition hover:bg-[#D95700] sm:px-6"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#1677D2] px-4 py-3 text-xs font-bold text-white transition hover:bg-[#0D5EAD] sm:px-6"
           >
             Fale conosco
             <ArrowUpRight size={16} />
@@ -126,13 +127,13 @@ export default async function Home() {
 
       {/* BANNER PRINCIPAL */}
       <section className="relative overflow-hidden bg-white">
-        <div className="absolute -right-40 -top-40 h-[520px] w-[520px] rounded-full bg-[#FF6B00]/[0.07] blur-[100px]" />
+        <div className="absolute -right-40 -top-40 h-[520px] w-[520px] rounded-full bg-[#1677D2]/[0.08] blur-[100px]" />
 
         <div className="relative mx-auto grid max-w-[1320px] items-center gap-12 px-5 py-20 sm:px-8 lg:grid-cols-2 lg:px-12 lg:py-28">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#FF6B00]/20 bg-[#FF6B00]/[0.06] px-4 py-2">
-              <Star size={14} className="fill-[#FF6B00] text-[#FF6B00]" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#D95700]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#1677D2]/20 bg-[#1677D2]/[0.06] px-4 py-2">
+              <Star size={14} className="fill-[#1677D2] text-[#1677D2]" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#123B68]">
                 VTCAR PREMIUM
               </span>
             </div>
@@ -140,10 +141,10 @@ export default async function Home() {
             <h1 className="mt-7 max-w-2xl text-4xl font-black leading-[1.08] tracking-tight sm:text-6xl lg:text-[68px]">
               Seu próximo carro.
               <br />
-              <span className="text-[#FF6B00]">Sua próxima conquista.</span>
+              <span className="text-[#1677D2]">Sua próxima conquista.</span>
             </h1>
 
-            <p className="mt-7 max-w-xl text-base leading-8 text-[#666] sm:text-lg">
+            <p className="mt-7 max-w-xl text-base leading-8 text-[#64748B] sm:text-lg">
               Encontre seu próximo veículo com uma experiência de compra
               diferenciada. Conheça a seleção VTCAR PREMIUM e conte com
               atendimento personalizado em cada etapa.
@@ -152,7 +153,7 @@ export default async function Home() {
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="#estoque"
-                className="inline-flex min-h-[56px] items-center justify-center gap-3 rounded-lg bg-[#FF6B00] px-7 text-sm font-bold text-white shadow-lg shadow-orange-600/20 transition hover:-translate-y-1 hover:bg-[#D95700]"
+                className="inline-flex min-h-[56px] items-center justify-center gap-3 rounded-lg bg-[#1677D2] px-7 text-sm font-bold text-white shadow-lg shadow-blue-900/20 transition hover:-translate-y-1 hover:bg-[#0D5EAD]"
               >
                 Explorar veículos
                 <ArrowRight size={18} />
@@ -160,49 +161,49 @@ export default async function Home() {
 
               <Link
                 href="#contato"
-                className="inline-flex min-h-[56px] items-center justify-center gap-3 rounded-lg border border-[#DDD] bg-white px-7 text-sm font-bold text-[#222] transition hover:border-[#FF6B00] hover:text-[#D95700]"
+                className="inline-flex min-h-[56px] items-center justify-center gap-3 rounded-lg border border-[#D7E1EC] bg-white px-7 text-sm font-bold text-[#123B68] transition hover:border-[#1677D2] hover:text-[#1677D2]"
               >
                 Falar com consultor
                 <MessageCircle size={18} />
               </Link>
             </div>
 
-            <div className="mt-10 flex flex-wrap gap-x-7 gap-y-4 text-sm text-[#666]">
+            <div className="mt-10 flex flex-wrap gap-x-7 gap-y-4 text-sm text-[#64748B]">
               <span className="flex items-center gap-2">
-                <CheckCircle2 size={17} className="text-[#FF6B00]" />
+                <CheckCircle2 size={17} className="text-[#1677D2]" />
                 Atendimento personalizado
               </span>
               <span className="flex items-center gap-2">
-                <CheckCircle2 size={17} className="text-[#FF6B00]" />
+                <CheckCircle2 size={17} className="text-[#1677D2]" />
                 Transparência
               </span>
             </div>
           </div>
 
           <div className="relative">
-            <div className="absolute inset-8 rounded-full bg-[#FF6B00]/10 blur-[90px]" />
+            <div className="absolute inset-8 rounded-full bg-[#1677D2]/15 blur-[90px]" />
 
-            <div className="relative overflow-hidden rounded-3xl border border-[#E9E9E9] bg-[#111] p-7 text-white shadow-2xl sm:p-10">
+            <div className="relative overflow-hidden rounded-3xl border border-[#DCE6F0] bg-[#071B35] p-7 text-white shadow-2xl sm:p-10">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold tracking-[0.25em] text-[#C6A15B]">
+                  <p className="text-xs font-bold tracking-[0.25em] text-white">
                     VTCAR PREMIUM
                   </p>
-                  <p className="mt-2 text-[10px] tracking-[0.18em] text-white/50">
+                  <p className="mt-2 text-[10px] tracking-[0.18em] text-[#B9D8F5]">
                     MOVEMOS CONQUISTAS
                   </p>
                 </div>
-                <CarFront size={30} className="text-[#FF6B00]" />
+                <CarFront size={30} className="text-[#55B8FF]" />
               </div>
 
-              <div className="my-10 flex min-h-[210px] items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-[#252525] to-[#090909]">
+              <div className="my-10 flex min-h-[210px] items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-[#174779] to-[#071B35]">
                 <div className="text-center">
                   <CarFront
                     size={110}
                     strokeWidth={1}
-                    className="mx-auto text-[#FF6B00]"
+                    className="mx-auto text-[#55B8FF]"
                   />
-                  <p className="mt-4 text-xs font-bold tracking-[0.25em] text-white/60">
+                  <p className="mt-4 text-xs font-bold tracking-[0.25em] text-white/70">
                     EXPERIÊNCIA AUTOMOTIVA
                   </p>
                 </div>
@@ -210,14 +211,14 @@ export default async function Home() {
 
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-white/50">
                     Nosso compromisso
                   </p>
                   <p className="mt-2 text-xl font-black">
                     Qualidade e confiança.
                   </p>
                 </div>
-                <span className="rounded-full border border-[#C6A15B]/40 px-3 py-2 text-[9px] font-bold tracking-widest text-[#C6A15B]">
+                <span className="rounded-full border border-[#55B8FF]/50 px-3 py-2 text-[9px] font-bold tracking-widest text-[#B9D8F5]">
                   PREMIUM
                 </span>
               </div>
@@ -226,19 +227,19 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* FAIXA DE DIFERENCIAIS */}
-      <section className="border-y border-[#EAEAEA] bg-white">
-        <div className="mx-auto grid max-w-[1320px] divide-y divide-[#EAEAEA] px-5 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:px-8 lg:px-12">
+      {/* DIFERENCIAIS */}
+      <section className="border-y border-[#E1E8F0] bg-white">
+        <div className="mx-auto grid max-w-[1320px] divide-y divide-[#E1E8F0] px-5 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:px-8 lg:px-12">
           {[
             ["01", "Atendimento próximo", "Atenção às suas necessidades."],
             ["02", "Negociação transparente", "Informações claras em cada etapa."],
             ["03", "Experiência premium", "Uma escolha feita com tranquilidade."],
           ].map(([number, title, description]) => (
             <div key={number} className="flex items-center gap-5 py-7 sm:px-6">
-              <span className="text-3xl font-black text-[#FF6B00]">{number}</span>
+              <span className="text-3xl font-black text-[#1677D2]">{number}</span>
               <div>
                 <h2 className="text-sm font-bold">{title}</h2>
-                <p className="mt-1 text-xs text-[#777]">{description}</p>
+                <p className="mt-1 text-xs text-[#64748B]">{description}</p>
               </div>
             </div>
           ))}
@@ -250,18 +251,18 @@ export default async function Home() {
         <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
           <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#D95700]">
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#1677D2]">
                 Seleção especial
               </p>
               <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">
                 Encontre seu próximo veículo.
               </h2>
-              <p className="mt-4 max-w-xl text-sm leading-7 text-[#777]">
+              <p className="mt-4 max-w-xl text-sm leading-7 text-[#64748B]">
                 Confira os veículos disponíveis no catálogo VTCAR PREMIUM.
               </p>
             </div>
 
-            <span className="text-sm font-semibold text-[#777]">
+            <span className="text-sm font-semibold text-[#64748B]">
               {vehicles.length} {vehicles.length === 1 ? "veículo disponível" : "veículos disponíveis"}
             </span>
           </div>
@@ -271,9 +272,9 @@ export default async function Home() {
               {vehicles.map((vehicle) => (
                 <article
                   key={vehicle.id}
-                  className="group overflow-hidden rounded-2xl border border-[#E8E8E8] bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  className="group overflow-hidden rounded-2xl border border-[#E1E8F0] bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
                 >
-                  <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden bg-[#ECECEB]">
+                  <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden bg-[#EAF0F6]">
                     {vehicle.cover_image ? (
                       <img
                         src={vehicle.cover_image}
@@ -281,18 +282,18 @@ export default async function Home() {
                         className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                       />
                     ) : (
-                      <CarFront size={70} strokeWidth={1} className="text-[#B7B7B7]" />
+                      <CarFront size={70} strokeWidth={1} className="text-[#91A7BE]" />
                     )}
 
                     {vehicle.featured && (
-                      <span className="absolute left-4 top-4 rounded-full bg-[#FF6B00] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                      <span className="absolute left-4 top-4 rounded-full bg-[#1677D2] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
                         Destaque
                       </span>
                     )}
                   </div>
 
                   <div className="p-6">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#999]">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8293A7]">
                       {vehicle.brand}
                     </p>
 
@@ -301,29 +302,29 @@ export default async function Home() {
                     </h3>
 
                     {vehicle.version && (
-                      <p className="mt-1 text-sm text-[#777]">{vehicle.version}</p>
+                      <p className="mt-1 text-sm text-[#64748B]">{vehicle.version}</p>
                     )}
 
-                    <div className="mt-5 grid grid-cols-2 gap-3 border-y border-[#EEE] py-4 text-xs text-[#777]">
+                    <div className="mt-5 grid grid-cols-2 gap-3 border-y border-[#E8EDF3] py-4 text-xs text-[#64748B]">
                       <span>{vehicle.manufacture_year}/{vehicle.model_year}</span>
                       <span>{formatMileage(vehicle.mileage)}</span>
-                      <span>{vehicle.transmission || "Consulte câmbio"}</span>
-                      <span>{vehicle.fuel_type || "Consulte combustível"}</span>
+                      <span>{vehicle.transmission || "Consulte o câmbio"}</span>
+                      <span>{vehicle.fuel_type || "Consulte o combustível"}</span>
                     </div>
 
                     <div className="mt-5 flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-[10px] uppercase tracking-wider text-[#999]">
+                        <p className="text-[10px] uppercase tracking-wider text-[#8293A7]">
                           Valor anunciado
                         </p>
-                        <p className="mt-1 text-xl font-black text-[#D95700]">
+                        <p className="mt-1 text-xl font-black text-[#123B68]">
                           {formatPrice(vehicle.price)}
                         </p>
                       </div>
 
                       <Link
                         href={`mailto:atendimento.vtcar@gmail.com?subject=${encodeURIComponent(`Interesse no veículo ${vehicle.title}`)}`}
-                        className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#111] text-white transition hover:bg-[#FF6B00]"
+                        className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#071B35] text-white transition hover:bg-[#1677D2]"
                         aria-label={`Consultar ${vehicle.title}`}
                       >
                         <ArrowUpRight size={20} />
@@ -334,18 +335,18 @@ export default async function Home() {
               ))}
             </div>
           ) : (
-            <div className="mt-12 rounded-2xl border border-[#E8E8E8] bg-white px-6 py-16 text-center shadow-sm">
-              <CarFront size={54} className="mx-auto text-[#FF6B00]" />
+            <div className="mt-12 rounded-2xl border border-[#E1E8F0] bg-white px-6 py-16 text-center shadow-sm">
+              <CarFront size={54} className="mx-auto text-[#1677D2]" />
               <h3 className="mt-5 text-2xl font-black">
                 Nosso catálogo está sendo preparado.
               </h3>
-              <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-[#777]">
+              <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-[#64748B]">
                 Em breve você poderá conferir nossos veículos disponíveis.
                 Entre em contato com a equipe para consultar oportunidades.
               </p>
               <Link
                 href="#contato"
-                className="mt-7 inline-flex items-center gap-2 rounded-lg bg-[#FF6B00] px-6 py-3 text-sm font-bold text-white hover:bg-[#D95700]"
+                className="mt-7 inline-flex items-center gap-2 rounded-lg bg-[#1677D2] px-6 py-3 text-sm font-bold text-white hover:bg-[#0D5EAD]"
               >
                 Falar com a equipe
                 <ArrowRight size={17} />
@@ -356,9 +357,9 @@ export default async function Home() {
       </section>
 
       {/* DIFERENCIAIS */}
-      <section id="diferenciais" className="scroll-mt-24 bg-[#111] py-20 text-white sm:py-28">
+      <section id="diferenciais" className="scroll-mt-24 bg-[#071B35] py-20 text-white sm:py-28">
         <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
-          <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#FF6B00]">
+          <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#55B8FF]">
             O padrão VTCAR
           </p>
 
@@ -384,10 +385,10 @@ export default async function Home() {
                 description: "Acompanhamento próximo para ajudar na sua escolha.",
               },
             ].map(({ icon: Icon, title, description }) => (
-              <div key={title} className="rounded-2xl border border-white/10 bg-white/[0.04] p-8">
-                <Icon size={32} className="text-[#FF6B00]" />
+              <div key={title} className="rounded-2xl border border-white/10 bg-white/[0.05] p-8">
+                <Icon size={32} className="text-[#55B8FF]" />
                 <h3 className="mt-6 text-xl font-bold">{title}</h3>
-                <p className="mt-3 text-sm leading-7 text-white/60">{description}</p>
+                <p className="mt-3 text-sm leading-7 text-white/65">{description}</p>
               </div>
             ))}
           </div>
@@ -398,7 +399,7 @@ export default async function Home() {
       <section id="sobre" className="scroll-mt-24 bg-white py-20 sm:py-28">
         <div className="mx-auto grid max-w-[1320px] gap-10 px-5 sm:px-8 md:grid-cols-2 md:items-center lg:px-12">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#D95700]">
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#1677D2]">
               Sobre a VTCAR
             </p>
             <h2 className="mt-4 text-3xl font-black leading-tight sm:text-5xl">
@@ -406,12 +407,12 @@ export default async function Home() {
             </h2>
           </div>
 
-          <div className="border-l-2 border-[#FF6B00] pl-7">
-            <p className="text-base leading-8 text-[#666]">
+          <div className="border-l-2 border-[#1677D2] pl-7">
+            <p className="text-base leading-8 text-[#64748B]">
               A VTCAR PREMIUM acredita que cada veículo representa novos
               caminhos, objetivos e conquistas.
             </p>
-            <p className="mt-5 text-base leading-8 text-[#666]">
+            <p className="mt-5 text-base leading-8 text-[#64748B]">
               Nosso compromisso é oferecer uma experiência automotiva moderna,
               transparente e personalizada, colocando o cliente no centro de
               cada negociação.
@@ -421,23 +422,23 @@ export default async function Home() {
       </section>
 
       {/* CONTATO */}
-      <section id="contato" className="scroll-mt-24 bg-[#F1F1EF] px-5 py-20 sm:px-8 sm:py-24 lg:px-12">
-        <div className="mx-auto flex max-w-[1320px] flex-col justify-between gap-8 rounded-3xl bg-[#111] p-8 text-white sm:p-14 lg:flex-row lg:items-center">
+      <section id="contato" className="scroll-mt-24 bg-[#EAF0F6] px-5 py-20 sm:px-8 sm:py-24 lg:px-12">
+        <div className="mx-auto flex max-w-[1320px] flex-col justify-between gap-8 rounded-3xl bg-[#071B35] p-8 text-white sm:p-14 lg:flex-row lg:items-center">
           <div className="max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#C6A15B]">
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#55B8FF]">
               Atendimento VTCAR PREMIUM
             </p>
             <h2 className="mt-4 text-3xl font-black sm:text-5xl">
               Sua próxima conquista começa com uma conversa.
             </h2>
-            <p className="mt-5 text-sm leading-7 text-white/60">
+            <p className="mt-5 text-sm leading-7 text-white/65">
               Entre em contato com nossa equipe e descubra as oportunidades disponíveis.
             </p>
           </div>
 
           <a
             href="mailto:atendimento.vtcar@gmail.com?subject=Atendimento%20VTCAR%20PREMIUM"
-            className="inline-flex min-h-[56px] shrink-0 items-center justify-center gap-3 rounded-lg bg-[#FF6B00] px-7 text-sm font-bold text-white transition hover:bg-[#D95700]"
+            className="inline-flex min-h-[56px] shrink-0 items-center justify-center gap-3 rounded-lg bg-[#1677D2] px-7 text-sm font-bold text-white transition hover:bg-[#0D5EAD]"
           >
             Falar com a equipe
             <ArrowUpRight size={18} />
@@ -446,28 +447,28 @@ export default async function Home() {
       </section>
 
       {/* RODAPÉ */}
-      <footer className="bg-[#090909] text-white">
+      <footer className="bg-[#071B35] text-white">
         <div className="mx-auto max-w-[1320px] px-5 py-12 sm:px-8 lg:px-12">
           <div className="flex flex-col justify-between gap-8 md:flex-row md:items-center">
             <div>
               <Logo />
-              <p className="mt-4 max-w-sm text-xs leading-6 text-white/45">
+              <p className="mt-4 max-w-sm text-xs leading-6 text-white/50">
                 Uma experiência automotiva construída sobre confiança, qualidade e compromisso.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-6 text-xs text-white/60">
-              <Link href="#estoque" className="hover:text-[#FF6B00]">Estoque</Link>
-              <Link href="#diferenciais" className="hover:text-[#FF6B00]">Diferenciais</Link>
-              <Link href="#sobre" className="hover:text-[#FF6B00]">Sobre nós</Link>
-              <Link href="#contato" className="hover:text-[#FF6B00]">Contato</Link>
+            <div className="flex flex-wrap gap-6 text-xs text-white/65">
+              <Link href="#estoque" className="hover:text-[#55B8FF]">Estoque</Link>
+              <Link href="#diferenciais" className="hover:text-[#55B8FF]">Diferenciais</Link>
+              <Link href="#sobre" className="hover:text-[#55B8FF]">Sobre nós</Link>
+              <Link href="#contato" className="hover:text-[#55B8FF]">Contato</Link>
             </div>
           </div>
 
-          <div className="mt-10 flex flex-col justify-between gap-3 border-t border-white/10 pt-7 text-[10px] tracking-wider text-white/40 sm:flex-row">
+          <div className="mt-10 flex flex-col justify-between gap-3 border-t border-white/10 pt-7 text-[10px] tracking-wider text-white/45 sm:flex-row">
             <p>© {new Date().getFullYear()} VTCAR PREMIUM. TODOS OS DIREITOS RESERVADOS.</p>
-            <p className="font-bold tracking-[0.2em] text-[#C6A15B]">
-              WE BUILD MOMENTUM.
+            <p className="font-bold tracking-[0.2em] text-[#B9D8F5]">
+              MOVEMOS CONQUISTAS.
             </p>
           </div>
         </div>
