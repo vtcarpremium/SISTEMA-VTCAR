@@ -1,533 +1,471 @@
 
 import Image from "next/image";
-
+import Link from "next/link";
 import {
   ArrowRight,
   ArrowUpRight,
   CarFront,
   CheckCircle2,
   ChevronRight,
-  Menu,
-  MessageCircle,
   ShieldCheck,
-  Sparkles,
-  Wallet,
+  Star,
+  MessageCircle,
 } from "lucide-react";
+import { query } from "../lib/db";
 
-const benefits = [
-  {
-    icon: ShieldCheck,
-    title: "Negociação transparente",
-    description:
-      "Informações claras e atendimento responsável para você comprar com tranquilidade.",
-    number: "01",
-  },
-  {
-    icon: Sparkles,
-    title: "Experiência premium",
-    description:
-      "Uma experiência diferenciada, com atenção aos detalhes em cada etapa.",
-    number: "02",
-  },
-  {
-    icon: Wallet,
-    title: "Condições facilitadas",
-    description:
-      "Atendimento personalizado para encontrar possibilidades alinhadas ao seu momento.",
-    number: "03",
-  },
-];
+export const dynamic = "force-dynamic";
 
-function BrandLogo() {
+type Vehicle = {
+  id: string;
+  title: string;
+  slug: string;
+  brand: string;
+  model: string;
+  version: string | null;
+  manufacture_year: number;
+  model_year: number;
+  price: number | string;
+  mileage: number;
+  transmission: string | null;
+  fuel_type: string | null;
+  cover_image: string | null;
+  featured: boolean;
+};
+
+async function getVehicles(): Promise<Vehicle[]> {
+  try {
+    const result = await query<Vehicle>(
+      `SELECT
+        v.id,
+        v.title,
+        v.slug,
+        v.brand,
+        v.model,
+        v.version,
+        v.manufacture_year,
+        v.model_year,
+        v.price,
+        v.mileage,
+        v.transmission,
+        v.fuel_type,
+        v.featured,
+        (
+          SELECT vi.image_url
+          FROM vehicle_images vi
+          WHERE vi.vehicle_id = v.id
+          ORDER BY vi.is_cover DESC, vi.position ASC
+          LIMIT 1
+        ) AS cover_image
+      FROM vehicles v
+      WHERE v.status = 'published'
+      ORDER BY v.featured DESC, v.published_at DESC NULLS LAST
+      LIMIT 6`
+    );
+
+    return result.rows;
+  } catch (error) {
+    console.error("Erro ao carregar catálogo:", error);
+    return [];
+  }
+}
+
+function formatPrice(price: number | string) {
+  return Number(price).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  });
+}
+
+function formatMileage(mileage: number) {
+  return `${Number(mileage).toLocaleString("pt-BR")} km`;
+}
+
+function Logo() {
   return (
-    <a
-      href="/"
-      aria-label="VTCAR PREMIUM - Página inicial"
-      className="group inline-flex items-center"
-    >
+    <Link href="/" aria-label="VTCAR PREMIUM - Início">
       <Image
         src="/logo.svg"
-        alt="VTCAR PREMIUM — Movemos Conquistas"
-        width={250}
-        height={83}
+        alt="VTCAR PREMIUM"
+        width={230}
+        height={76}
         priority
-        className="h-auto w-[175px] transition duration-300 group-hover:scale-[1.03] sm:w-[215px]"
+        className="h-auto w-[155px] sm:w-[190px]"
       />
-    </a>
+    </Link>
   );
 }
 
-function DecorativeCar() {
+export default async function Home() {
+  const vehicles = await getVehicles();
+
   return (
-    <svg
-      viewBox="0 0 720 430"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-full w-full"
-      aria-label="Ilustração abstrata de um automóvel esportivo"
-      role="img"
-    >
-      <defs>
-        <linearGradient id="carLine" x1="100" y1="120" x2="630" y2="350">
-          <stop stopColor="#FF6B00" />
-          <stop offset="1" stopColor="#C6A15B" />
-        </linearGradient>
-        <linearGradient id="carGlow" x1="350" y1="180" x2="350" y2="370">
-          <stop stopColor="#FF6B00" stopOpacity=".22" />
-          <stop offset="1" stopColor="#FF6B00" stopOpacity="0" />
-        </linearGradient>
-      </defs>
+    <main className="min-h-screen bg-[#F7F7F5] text-[#171717]">
+      {/* CABEÇALHO */}
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#090909] shadow-lg">
+        <div className="mx-auto flex min-h-[82px] max-w-[1320px] items-center justify-between gap-5 px-5 sm:px-8 lg:px-12">
+          <Logo />
 
-      <ellipse cx="365" cy="330" rx="285" ry="75" fill="url(#carGlow)" />
-
-      <path
-        d="M75 282L118 263L165 248L216 188C231 171 250 160 271 155L390 128C417 122 445 129 466 147L551 222L615 242C635 249 650 267 650 288V310H592C585 275 557 251 523 251C489 251 461 275 454 310H257C250 275 222 251 188 251C154 251 126 275 119 310H75V282Z"
-        stroke="url(#carLine)"
-        strokeWidth="4"
-        strokeLinejoin="round"
-      />
-
-      <path
-        d="M238 181L278 161L386 139C408 135 429 141 446 155L512 215H207L238 181Z"
-        stroke="#C6A15B"
-        strokeOpacity=".75"
-        strokeWidth="2"
-      />
-
-      <path
-        d="M363 141L351 215M451 157L435 215"
-        stroke="#C6A15B"
-        strokeOpacity=".55"
-        strokeWidth="2"
-      />
-
-      <path
-        d="M84 280L152 267M565 234L620 255"
-        stroke="#FF6B00"
-        strokeWidth="4"
-        strokeLinecap="round"
-      />
-
-      <circle cx="188" cy="310" r="38" fill="#090909" stroke="#C6A15B" strokeWidth="3" />
-      <circle cx="188" cy="310" r="22" stroke="#FF6B00" strokeWidth="3" />
-      <circle cx="188" cy="310" r="7" fill="#C6A15B" />
-
-      <circle cx="523" cy="310" r="38" fill="#090909" stroke="#C6A15B" strokeWidth="3" />
-      <circle cx="523" cy="310" r="22" stroke="#FF6B00" strokeWidth="3" />
-      <circle cx="523" cy="310" r="7" fill="#C6A15B" />
-
-      <path d="M78 347H640" stroke="#FF6B00" strokeOpacity=".3" strokeWidth="1" />
-      <path d="M145 367H575" stroke="#C6A15B" strokeOpacity=".2" strokeWidth="1" />
-    </svg>
-  );
-}
-
-export default function Home() {
-  return (
-    <main className="min-h-screen overflow-hidden bg-[#090909] text-white selection:bg-[#FF6B00] selection:text-white">
-
-      {/* HEADER */}
-      <header className="sticky top-0 z-50 border-b border-white/[0.07] bg-[#090909]/95 backdrop-blur-xl">
-        <div className="mx-auto flex h-[82px] max-w-[1320px] items-center justify-between px-5 sm:px-8 lg:px-12">
-
-          <BrandLogo />
-
-          <nav className="hidden items-center gap-9 text-[13px] font-medium text-[#A1A1AA] lg:flex">
-            <a href="#" className="transition hover:text-[#FF6B00]">
-              Início
-            </a>
-            <a href="#estoque" className="transition hover:text-[#FF6B00]">
-              Estoque
-            </a>
-            <a href="#diferenciais" className="transition hover:text-[#FF6B00]">
-              Diferenciais
-            </a>
-            <a href="#sobre" className="transition hover:text-[#FF6B00]">
-              Sobre nós
-            </a>
-            <a href="#contato" className="transition hover:text-[#FF6B00]">
-              Contato
-            </a>
+          <nav className="hidden items-center gap-8 text-sm font-medium text-white/75 lg:flex">
+            <Link href="/" className="text-[#FF6B00]">Início</Link>
+            <Link href="#estoque" className="transition hover:text-[#FF6B00]">Estoque</Link>
+            <Link href="#diferenciais" className="transition hover:text-[#FF6B00]">Por que escolher</Link>
+            <Link href="#sobre" className="transition hover:text-[#FF6B00]">Sobre nós</Link>
+            <Link href="#contato" className="transition hover:text-[#FF6B00]">Contato</Link>
           </nav>
 
-          <a
+          <Link
             href="#contato"
-            className="hidden items-center gap-2 rounded-lg bg-[#FF6B00] px-5 py-3 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-[#D95700] sm:inline-flex"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#FF6B00] px-4 py-3 text-xs font-bold text-white transition hover:bg-[#D95700] sm:px-6"
           >
             Fale conosco
-            <ArrowUpRight size={15} />
-          </a>
-
-          <a
-            href="#contato"
-            className="rounded-lg border border-white/10 p-2.5 text-white lg:hidden"
-            aria-label="Ir para contato"
-          >
-            <Menu size={21} />
-          </a>
+            <ArrowUpRight size={16} />
+          </Link>
         </div>
       </header>
 
-      {/* HERO */}
-      <section className="relative border-b border-white/[0.06]">
-        <div className="pointer-events-none absolute -right-40 top-0 h-[500px] w-[500px] rounded-full bg-[#FF6B00]/[0.07] blur-[130px]" />
-        <div className="pointer-events-none absolute -left-40 bottom-0 h-[300px] w-[300px] rounded-full bg-[#C6A15B]/[0.04] blur-[120px]" />
+      {/* BANNER PRINCIPAL */}
+      <section className="relative overflow-hidden bg-white">
+        <div className="absolute -right-40 -top-40 h-[520px] w-[520px] rounded-full bg-[#FF6B00]/[0.07] blur-[100px]" />
 
-        <div className="relative mx-auto grid min-h-[650px] max-w-[1320px] items-center gap-8 px-5 py-20 sm:px-8 lg:grid-cols-[1.02fr_0.98fr] lg:px-12 lg:py-24">
-
-          <div className="relative z-10">
-            <div className="mb-8 inline-flex items-center gap-2.5 rounded-full border border-[#C6A15B]/25 bg-[#C6A15B]/[0.06] px-4 py-2.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#FF6B00]" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C6A15B]">
-                Excelência em cada escolha
+        <div className="relative mx-auto grid max-w-[1320px] items-center gap-12 px-5 py-20 sm:px-8 lg:grid-cols-2 lg:px-12 lg:py-28">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#FF6B00]/20 bg-[#FF6B00]/[0.06] px-4 py-2">
+              <Star size={14} className="fill-[#FF6B00] text-[#FF6B00]" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#D95700]">
+                VTCAR PREMIUM
               </span>
             </div>
 
-            <h1 className="max-w-2xl text-[43px] font-black leading-[1.06] tracking-[-0.045em] sm:text-6xl lg:text-[70px]">
-              Sua próxima conquista começa{" "}
-              <span className="text-[#FF6B00]">aqui.</span>
+            <h1 className="mt-7 max-w-2xl text-4xl font-black leading-[1.08] tracking-tight sm:text-6xl lg:text-[68px]">
+              Seu próximo carro.
+              <br />
+              <span className="text-[#FF6B00]">Sua próxima conquista.</span>
             </h1>
 
-            <p className="mt-7 max-w-[510px] text-[15px] leading-8 text-[#A1A1AA] sm:text-base">
-              Mais do que encontrar um automóvel, queremos proporcionar uma
-              experiência de compra diferenciada. Conheça a VTCAR PREMIUM.
+            <p className="mt-7 max-w-xl text-base leading-8 text-[#666] sm:text-lg">
+              Encontre seu próximo veículo com uma experiência de compra
+              diferenciada. Conheça a seleção VTCAR PREMIUM e conte com
+              atendimento personalizado em cada etapa.
             </p>
 
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <a
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <Link
                 href="#estoque"
-                className="inline-flex min-h-[54px] items-center justify-center gap-3 rounded-lg bg-[#FF6B00] px-7 text-xs font-extrabold uppercase tracking-wider text-white transition hover:-translate-y-0.5 hover:bg-[#D95700]"
+                className="inline-flex min-h-[56px] items-center justify-center gap-3 rounded-lg bg-[#FF6B00] px-7 text-sm font-bold text-white shadow-lg shadow-orange-600/20 transition hover:-translate-y-1 hover:bg-[#D95700]"
               >
-                Conheça nosso estoque
-                <ArrowRight size={17} />
-              </a>
+                Explorar veículos
+                <ArrowRight size={18} />
+              </Link>
 
-              <a
+              <Link
                 href="#contato"
-                className="inline-flex min-h-[54px] items-center justify-center gap-3 rounded-lg border border-white/15 px-7 text-xs font-bold uppercase tracking-wider text-white transition hover:border-[#C6A15B]/60 hover:text-[#C6A15B]"
+                className="inline-flex min-h-[56px] items-center justify-center gap-3 rounded-lg border border-[#DDD] bg-white px-7 text-sm font-bold text-[#222] transition hover:border-[#FF6B00] hover:text-[#D95700]"
               >
-                Entre em contato
-                <MessageCircle size={17} />
-              </a>
+                Falar com consultor
+                <MessageCircle size={18} />
+              </Link>
             </div>
 
-            <div className="mt-12 flex flex-wrap gap-x-7 gap-y-4 border-t border-white/[0.08] pt-7">
-              <div className="flex items-center gap-2 text-xs text-[#A1A1AA]">
-                <CheckCircle2 size={16} className="text-[#FF6B00]" />
+            <div className="mt-10 flex flex-wrap gap-x-7 gap-y-4 text-sm text-[#666]">
+              <span className="flex items-center gap-2">
+                <CheckCircle2 size={17} className="text-[#FF6B00]" />
                 Atendimento personalizado
-              </div>
-
-              <div className="flex items-center gap-2 text-xs text-[#A1A1AA]">
-                <CheckCircle2 size={16} className="text-[#FF6B00]" />
-                Transparência na negociação
-              </div>
+              </span>
+              <span className="flex items-center gap-2">
+                <CheckCircle2 size={17} className="text-[#FF6B00]" />
+                Transparência
+              </span>
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-[650px]">
-            <div className="absolute inset-10 rounded-full bg-[#FF6B00]/10 blur-[100px]" />
+          <div className="relative">
+            <div className="absolute inset-8 rounded-full bg-[#FF6B00]/10 blur-[90px]" />
 
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#1B1A18] via-[#121212] to-[#090909] p-5 sm:p-9">
-
-              <div className="flex items-center justify-between border-b border-white/10 pb-5">
+            <div className="relative overflow-hidden rounded-3xl border border-[#E9E9E9] bg-[#111] p-7 text-white shadow-2xl sm:p-10">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] font-bold tracking-[0.24em] text-[#C6A15B]">
+                  <p className="text-xs font-bold tracking-[0.25em] text-[#C6A15B]">
                     VTCAR PREMIUM
                   </p>
-                  <p className="mt-1 text-[9px] tracking-[0.16em] text-[#777]">
-                    AUTOMOTIVE EXPERIENCE
+                  <p className="mt-2 text-[10px] tracking-[0.18em] text-white/50">
+                    MOVEMOS CONQUISTAS
                   </p>
                 </div>
+                <CarFront size={30} className="text-[#FF6B00]" />
+              </div>
 
-                <div className="rounded-full border border-[#C6A15B]/30 px-3 py-1.5 text-[9px] font-bold tracking-[0.16em] text-[#C6A15B]">
-                  EXCLUSIVIDADE
+              <div className="my-10 flex min-h-[210px] items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-[#252525] to-[#090909]">
+                <div className="text-center">
+                  <CarFront
+                    size={110}
+                    strokeWidth={1}
+                    className="mx-auto text-[#FF6B00]"
+                  />
+                  <p className="mt-4 text-xs font-bold tracking-[0.25em] text-white/60">
+                    EXPERIÊNCIA AUTOMOTIVA
+                  </p>
                 </div>
               </div>
 
-              <div className="relative my-6 aspect-[1.5/1]">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-48 w-48 rounded-full border border-[#FF6B00]/10 sm:h-64 sm:w-64" />
-                  <div className="absolute h-36 w-36 rounded-full border border-[#C6A15B]/10 sm:h-52 sm:w-52" />
-                </div>
-
-                <div className="relative h-full w-full">
-                  <DecorativeCar />
-                </div>
-              </div>
-
-              <div className="flex items-end justify-between border-t border-white/10 pt-5">
+              <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-[9px] font-bold tracking-[0.2em] text-[#777]">
-                    NOSSO PROPÓSITO
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">
+                    Nosso compromisso
                   </p>
-                  <p className="mt-2 text-lg font-black tracking-tight text-white sm:text-xl">
-                    MOVEMOS CONQUISTAS.
-                  </p>
-                </div>
-
-                <div className="text-right">
-                  <p className="text-[9px] tracking-widest text-[#777]">
-                    DESDE O PRIMEIRO CONTATO
-                  </p>
-                  <p className="mt-2 text-xs font-bold text-[#C6A15B]">
-                    VTCAR / PREMIUM
+                  <p className="mt-2 text-xl font-black">
+                    Qualidade e confiança.
                   </p>
                 </div>
+                <span className="rounded-full border border-[#C6A15B]/40 px-3 py-2 text-[9px] font-bold tracking-widest text-[#C6A15B]">
+                  PREMIUM
+                </span>
               </div>
             </div>
-
-            <div className="absolute -bottom-3 -right-3 -z-10 h-full w-full rounded-2xl border border-[#FF6B00]/20" />
           </div>
         </div>
       </section>
 
-      {/* FAIXA INSTITUCIONAL */}
-      <section className="border-b border-white/[0.07] bg-[#101010]">
-        <div className="mx-auto grid max-w-[1320px] grid-cols-1 divide-y divide-white/[0.07] px-5 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:px-8 lg:px-12">
+      {/* FAIXA DE DIFERENCIAIS */}
+      <section className="border-y border-[#EAEAEA] bg-white">
+        <div className="mx-auto grid max-w-[1320px] divide-y divide-[#EAEAEA] px-5 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:px-8 lg:px-12">
           {[
-            ["01", "Qualidade", "Compromisso com cada detalhe."],
-            ["02", "Confiança", "Relacionamentos construídos com transparência."],
-            ["03", "Experiência", "Atendimento que valoriza sua escolha."],
+            ["01", "Atendimento próximo", "Atenção às suas necessidades."],
+            ["02", "Negociação transparente", "Informações claras em cada etapa."],
+            ["03", "Experiência premium", "Uma escolha feita com tranquilidade."],
           ].map(([number, title, description]) => (
-            <div
-              key={number}
-              className="flex items-center gap-5 py-7 sm:px-6 lg:px-9"
-            >
-              <span className="text-2xl font-black text-[#FF6B00]">
-                {number}
-              </span>
-
+            <div key={number} className="flex items-center gap-5 py-7 sm:px-6">
+              <span className="text-3xl font-black text-[#FF6B00]">{number}</span>
               <div>
-                <p className="text-sm font-bold text-white">{title}</p>
-                <p className="mt-1 text-xs text-[#888]">{description}</p>
+                <h2 className="text-sm font-bold">{title}</h2>
+                <p className="mt-1 text-xs text-[#777]">{description}</p>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ESTOQUE */}
-      <section id="estoque" className="scroll-mt-24 py-24 sm:py-28">
+      {/* CATÁLOGO */}
+      <section id="estoque" className="scroll-mt-24 py-20 sm:py-28">
         <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
-
-          <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
             <div>
-              <div className="flex items-center gap-3">
-                <span className="h-px w-8 bg-[#FF6B00]" />
-                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#FF6B00]">
-                  Seleção VTCAR
-                </p>
-              </div>
-
-              <h2 className="mt-5 text-3xl font-black tracking-tight sm:text-5xl">
-                Nosso estoque<span className="text-[#FF6B00]">.</span>
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#D95700]">
+                Seleção especial
+              </p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">
+                Encontre seu próximo veículo.
               </h2>
-
-              <p className="mt-4 max-w-xl text-sm leading-7 text-[#888]">
-                Encontre o veículo que combina com seu estilo, suas necessidades e suas próximas conquistas.
+              <p className="mt-4 max-w-xl text-sm leading-7 text-[#777]">
+                Confira os veículos disponíveis no catálogo VTCAR PREMIUM.
               </p>
             </div>
 
-            <span className="inline-flex items-center gap-2 text-xs font-semibold text-[#C6A15B]">
-              CATÁLOGO VTCAR PREMIUM
-              <ChevronRight size={15} />
+            <span className="text-sm font-semibold text-[#777]">
+              {vehicles.length} {vehicles.length === 1 ? "veículo disponível" : "veículos disponíveis"}
             </span>
           </div>
 
-          <div className="mt-12 overflow-hidden rounded-2xl border border-white/10 bg-[#111111]">
-            <div className="grid items-center gap-8 p-7 sm:p-12 lg:grid-cols-[auto_1fr] lg:gap-14">
-
-              <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl border border-[#FF6B00]/20 bg-[#FF6B00]/[0.06] text-[#FF6B00]">
-                <CarFront size={48} strokeWidth={1.3} />
-              </div>
-
-              <div className="text-center lg:text-left">
-                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#C6A15B]">
-                  Novidades em breve
-                </p>
-
-                <h3 className="mt-3 text-2xl font-black text-white sm:text-3xl">
-                  Estamos preparando nosso catálogo.
-                </h3>
-
-                <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#888] lg:mx-0">
-                  Nosso estoque será atualizado com veículos cadastrados e informações oficiais.
-                  Entre em contato com nossa equipe para consultar as oportunidades disponíveis.
-                </p>
-
-                <a
-                  href="#contato"
-                  className="mt-7 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#FF6B00] transition hover:gap-4"
+          {vehicles.length > 0 ? (
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {vehicles.map((vehicle) => (
+                <article
+                  key={vehicle.id}
+                  className="group overflow-hidden rounded-2xl border border-[#E8E8E8] bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
                 >
-                  Consultar oportunidades
-                  <ArrowRight size={16} />
-                </a>
-              </div>
+                  <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden bg-[#ECECEB]">
+                    {vehicle.cover_image ? (
+                      <img
+                        src={vehicle.cover_image}
+                        alt={`${vehicle.brand} ${vehicle.model}`}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <CarFront size={70} strokeWidth={1} className="text-[#B7B7B7]" />
+                    )}
+
+                    {vehicle.featured && (
+                      <span className="absolute left-4 top-4 rounded-full bg-[#FF6B00] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                        Destaque
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="p-6">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#999]">
+                      {vehicle.brand}
+                    </p>
+
+                    <h3 className="mt-2 text-xl font-extrabold">
+                      {vehicle.model}
+                    </h3>
+
+                    {vehicle.version && (
+                      <p className="mt-1 text-sm text-[#777]">{vehicle.version}</p>
+                    )}
+
+                    <div className="mt-5 grid grid-cols-2 gap-3 border-y border-[#EEE] py-4 text-xs text-[#777]">
+                      <span>{vehicle.manufacture_year}/{vehicle.model_year}</span>
+                      <span>{formatMileage(vehicle.mileage)}</span>
+                      <span>{vehicle.transmission || "Consulte câmbio"}</span>
+                      <span>{vehicle.fuel_type || "Consulte combustível"}</span>
+                    </div>
+
+                    <div className="mt-5 flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-[#999]">
+                          Valor anunciado
+                        </p>
+                        <p className="mt-1 text-xl font-black text-[#D95700]">
+                          {formatPrice(vehicle.price)}
+                        </p>
+                      </div>
+
+                      <Link
+                        href={`mailto:atendimento.vtcar@gmail.com?subject=${encodeURIComponent(`Interesse no veículo ${vehicle.title}`)}`}
+                        className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#111] text-white transition hover:bg-[#FF6B00]"
+                        aria-label={`Consultar ${vehicle.title}`}
+                      >
+                        <ArrowUpRight size={20} />
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              ))}
             </div>
-          </div>
+          ) : (
+            <div className="mt-12 rounded-2xl border border-[#E8E8E8] bg-white px-6 py-16 text-center shadow-sm">
+              <CarFront size={54} className="mx-auto text-[#FF6B00]" />
+              <h3 className="mt-5 text-2xl font-black">
+                Nosso catálogo está sendo preparado.
+              </h3>
+              <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-[#777]">
+                Em breve você poderá conferir nossos veículos disponíveis.
+                Entre em contato com a equipe para consultar oportunidades.
+              </p>
+              <Link
+                href="#contato"
+                className="mt-7 inline-flex items-center gap-2 rounded-lg bg-[#FF6B00] px-6 py-3 text-sm font-bold text-white hover:bg-[#D95700]"
+              >
+                Falar com a equipe
+                <ArrowRight size={17} />
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
       {/* DIFERENCIAIS */}
-      <section
-        id="diferenciais"
-        className="scroll-mt-24 border-y border-white/[0.07] bg-[#101010] py-24 sm:py-28"
-      >
+      <section id="diferenciais" className="scroll-mt-24 bg-[#111] py-20 text-white sm:py-28">
         <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
+          <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#FF6B00]">
+            O padrão VTCAR
+          </p>
 
-          <div className="max-w-2xl">
-            <div className="flex items-center gap-3">
-              <span className="h-px w-8 bg-[#FF6B00]" />
-              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#FF6B00]">
-                O padrão VTCAR
-              </p>
-            </div>
+          <h2 className="mt-4 max-w-2xl text-3xl font-black sm:text-5xl">
+            Comprar bem começa com uma boa experiência.
+          </h2>
 
-            <h2 className="mt-5 text-3xl font-black tracking-tight sm:text-5xl">
-              Mais que veículos.
-              <br />
-              <span className="text-[#C6A15B]">Uma experiência.</span>
-            </h2>
-
-            <p className="mt-5 text-sm leading-7 text-[#888]">
-              Acreditamos que uma boa negociação começa com confiança, informação e respeito ao cliente.
-            </p>
-          </div>
-
-          <div className="mt-14 grid gap-5 md:grid-cols-3">
-            {benefits.map(({ icon: Icon, title, description, number }) => (
-              <article
-                key={number}
-                className="group relative overflow-hidden rounded-xl border border-white/[0.08] bg-[#151515] p-8 transition duration-300 hover:-translate-y-1 hover:border-[#FF6B00]/40"
-              >
-                <div className="absolute right-7 top-7 text-4xl font-black text-white/[0.035]">
-                  {number}
-                </div>
-
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-[#FF6B00]/20 bg-[#FF6B00]/[0.07] text-[#FF6B00] transition group-hover:bg-[#FF6B00] group-hover:text-white">
-                  <Icon size={26} strokeWidth={1.6} />
-                </div>
-
-                <h3 className="mt-8 text-lg font-bold text-white">{title}</h3>
-
-                <p className="mt-3 text-sm leading-7 text-[#888]">
-                  {description}
-                </p>
-
-                <div className="mt-8 h-px w-10 bg-[#C6A15B]/50 transition-all group-hover:w-full group-hover:bg-[#FF6B00]" />
-              </article>
+          <div className="mt-12 grid gap-5 md:grid-cols-3">
+            {[
+              {
+                icon: ShieldCheck,
+                title: "Confiança",
+                description: "Informações claras e respeito em cada negociação.",
+              },
+              {
+                icon: Star,
+                title: "Qualidade",
+                description: "Uma experiência de compra pensada nos detalhes.",
+              },
+              {
+                icon: MessageCircle,
+                title: "Atendimento",
+                description: "Acompanhamento próximo para ajudar na sua escolha.",
+              },
+            ].map(({ icon: Icon, title, description }) => (
+              <div key={title} className="rounded-2xl border border-white/10 bg-white/[0.04] p-8">
+                <Icon size={32} className="text-[#FF6B00]" />
+                <h3 className="mt-6 text-xl font-bold">{title}</h3>
+                <p className="mt-3 text-sm leading-7 text-white/60">{description}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* SOBRE */}
-      <section id="sobre" className="scroll-mt-24 py-24 sm:py-28">
-        <div className="mx-auto grid max-w-[1320px] gap-12 px-5 sm:px-8 md:grid-cols-2 md:items-center lg:px-12">
-
+      <section id="sobre" className="scroll-mt-24 bg-white py-20 sm:py-28">
+        <div className="mx-auto grid max-w-[1320px] gap-10 px-5 sm:px-8 md:grid-cols-2 md:items-center lg:px-12">
           <div>
-            <div className="flex items-center gap-3">
-              <span className="h-px w-8 bg-[#FF6B00]" />
-              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#FF6B00]">
-                Nossa essência
-              </p>
-            </div>
-
-            <h2 className="mt-5 text-4xl font-black leading-tight tracking-tight sm:text-5xl">
-              Movemos você em direção às suas{" "}
-              <span className="text-[#FF6B00]">conquistas.</span>
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#D95700]">
+              Sobre a VTCAR
+            </p>
+            <h2 className="mt-4 text-3xl font-black leading-tight sm:text-5xl">
+              Movemos você em direção às suas conquistas.
             </h2>
           </div>
 
-          <div className="border-l border-[#C6A15B]/40 pl-7 sm:pl-10">
-            <p className="text-base leading-8 text-[#A1A1AA]">
-              A VTCAR PREMIUM acredita que cada veículo representa mais do que uma escolha.
-              Representa novos caminhos, objetivos e conquistas.
+          <div className="border-l-2 border-[#FF6B00] pl-7">
+            <p className="text-base leading-8 text-[#666]">
+              A VTCAR PREMIUM acredita que cada veículo representa novos
+              caminhos, objetivos e conquistas.
             </p>
-
-            <p className="mt-5 text-base leading-8 text-[#A1A1AA]">
-              Nosso compromisso é oferecer uma experiência automotiva moderna, transparente
-              e personalizada, colocando o cliente no centro de cada negociação.
-            </p>
-
-            <p className="mt-8 text-xs font-bold tracking-[0.22em] text-[#C6A15B]">
-              VTCAR PREMIUM — MOVEMOS CONQUISTAS.
+            <p className="mt-5 text-base leading-8 text-[#666]">
+              Nosso compromisso é oferecer uma experiência automotiva moderna,
+              transparente e personalizada, colocando o cliente no centro de
+              cada negociação.
             </p>
           </div>
         </div>
       </section>
 
       {/* CONTATO */}
-      <section
-        id="contato"
-        className="scroll-mt-24 px-5 pb-24 sm:px-8 sm:pb-28 lg:px-12"
-      >
-        <div className="relative mx-auto max-w-[1320px] overflow-hidden rounded-2xl border border-[#C6A15B]/20 bg-[#15120F]">
-
-          <div className="pointer-events-none absolute -right-20 -top-40 h-96 w-96 rounded-full bg-[#FF6B00]/10 blur-[100px]" />
-
-          <div className="relative grid gap-10 p-8 sm:p-14 lg:grid-cols-[1fr_auto] lg:items-center">
-
-            <div className="max-w-2xl">
-              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#C6A15B]">
-                Atendimento VTCAR PREMIUM
-              </p>
-
-              <h2 className="mt-5 text-3xl font-black leading-tight tracking-tight sm:text-5xl">
-                Sua próxima conquista merece uma experiência à altura.
-              </h2>
-
-              <p className="mt-5 max-w-xl text-sm leading-7 text-[#A1A1AA]">
-                Converse com nossa equipe e descubra como podemos ajudar você a encontrar seu próximo veículo.
-              </p>
-            </div>
-
-            <a
-              href="mailto:atendimento.vtcar@gmail.com?subject=Atendimento%20VTCAR%20PREMIUM"
-              className="inline-flex min-h-[56px] items-center justify-center gap-3 rounded-lg bg-[#FF6B00] px-7 text-xs font-extrabold uppercase tracking-wider text-white transition hover:-translate-y-0.5 hover:bg-[#D95700]"
-            >
-              Falar com a equipe
-              <ArrowUpRight size={17} />
-            </a>
+      <section id="contato" className="scroll-mt-24 bg-[#F1F1EF] px-5 py-20 sm:px-8 sm:py-24 lg:px-12">
+        <div className="mx-auto flex max-w-[1320px] flex-col justify-between gap-8 rounded-3xl bg-[#111] p-8 text-white sm:p-14 lg:flex-row lg:items-center">
+          <div className="max-w-2xl">
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#C6A15B]">
+              Atendimento VTCAR PREMIUM
+            </p>
+            <h2 className="mt-4 text-3xl font-black sm:text-5xl">
+              Sua próxima conquista começa com uma conversa.
+            </h2>
+            <p className="mt-5 text-sm leading-7 text-white/60">
+              Entre em contato com nossa equipe e descubra as oportunidades disponíveis.
+            </p>
           </div>
+
+          <a
+            href="mailto:atendimento.vtcar@gmail.com?subject=Atendimento%20VTCAR%20PREMIUM"
+            className="inline-flex min-h-[56px] shrink-0 items-center justify-center gap-3 rounded-lg bg-[#FF6B00] px-7 text-sm font-bold text-white transition hover:bg-[#D95700]"
+          >
+            Falar com a equipe
+            <ArrowUpRight size={18} />
+          </a>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-white/[0.08] bg-[#070707]">
+      {/* RODAPÉ */}
+      <footer className="bg-[#090909] text-white">
         <div className="mx-auto max-w-[1320px] px-5 py-12 sm:px-8 lg:px-12">
-
-          <div className="flex flex-col justify-between gap-9 md:flex-row md:items-center">
-
+          <div className="flex flex-col justify-between gap-8 md:flex-row md:items-center">
             <div>
-              <BrandLogo />
-
-              <p className="mt-5 max-w-sm text-xs leading-6 text-[#777]">
+              <Logo />
+              <p className="mt-4 max-w-sm text-xs leading-6 text-white/45">
                 Uma experiência automotiva construída sobre confiança, qualidade e compromisso.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-x-7 gap-y-4 text-xs font-medium text-[#888]">
-              <a href="#estoque" className="transition hover:text-[#FF6B00]">
-                Estoque
-              </a>
-              <a href="#diferenciais" className="transition hover:text-[#FF6B00]">
-                Diferenciais
-              </a>
-              <a href="#sobre" className="transition hover:text-[#FF6B00]">
-                Sobre nós
-              </a>
-              <a href="#contato" className="transition hover:text-[#FF6B00]">
-                Contato
-              </a>
+            <div className="flex flex-wrap gap-6 text-xs text-white/60">
+              <Link href="#estoque" className="hover:text-[#FF6B00]">Estoque</Link>
+              <Link href="#diferenciais" className="hover:text-[#FF6B00]">Diferenciais</Link>
+              <Link href="#sobre" className="hover:text-[#FF6B00]">Sobre nós</Link>
+              <Link href="#contato" className="hover:text-[#FF6B00]">Contato</Link>
             </div>
           </div>
 
-          <div className="mt-10 flex flex-col justify-between gap-4 border-t border-white/[0.07] pt-7 text-[10px] tracking-wider text-[#666] sm:flex-row">
-            <p>
-              © {new Date().getFullYear()} VTCAR PREMIUM. TODOS OS DIREITOS RESERVADOS.
-            </p>
-
+          <div className="mt-10 flex flex-col justify-between gap-3 border-t border-white/10 pt-7 text-[10px] tracking-wider text-white/40 sm:flex-row">
+            <p>© {new Date().getFullYear()} VTCAR PREMIUM. TODOS OS DIREITOS RESERVADOS.</p>
             <p className="font-bold tracking-[0.2em] text-[#C6A15B]">
               WE BUILD MOMENTUM.
             </p>
