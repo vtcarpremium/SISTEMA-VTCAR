@@ -1,0 +1,60 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 330" fill="none">
+  <defs>
+    <linearGradient id="silver" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset=".48" stop-color="#AEB4BC"/>
+      <stop offset="1" stop-color="#626A73"/>
+    </linearGradient>
+    <linearGradient id="orange" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFC16B"/>
+      <stop offset=".45" stop-color="#FF6B00"/>
+      <stop offset="1" stop-color="#C94100"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#8F6A2C"/>
+      <stop offset=".5" stop-color="#F2D28A"/>
+      <stop offset="1" stop-color="#A77A34"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Escudo -->
+  <path d="M500 13 L720 65 L704 190 Q670 251 500 294 Q330 251 296 190 L280 65 Z"
+        stroke="url(#gold)" stroke-width="5"/>
+  <path d="M500 25 L707 74 L692 184 Q660 235 500 276 Q340 235 308 184 L293 74 Z"
+        stroke="#5B4525" stroke-width="2"/>
+
+  <!-- Carro esportivo -->
+  <path d="M348 158 L378 117 Q393 99 425 96 L570 96 Q606 98 628 122 L658 158"
+        stroke="url(#silver)" stroke-width="8" stroke-linecap="round"/>
+  <path d="M388 117 L422 101 L575 101 L615 119"
+        stroke="#AEB4BC" stroke-width="3"/>
+  <path d="M338 160 L379 143 L430 137 L572 137 L624 143 L663 160"
+        stroke="url(#orange)" stroke-width="7" stroke-linecap="round"/>
+  <path d="M350 161 L374 177 L626 177 L651 161"
+        stroke="url(#silver)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M365 159 L399 151 L418 151" stroke="#FF6B00" stroke-width="5"/>
+  <path d="M635 159 L601 151 L582 151" stroke="#FF6B00" stroke-width="5"/>
+  <path d="M450 106 L431 135 M550 106 L569 135"
+        stroke="#777F89" stroke-width="3"/>
+
+  <!-- Nome -->
+  <text x="500" y="226" text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="102" font-weight="900" letter-spacing="-5">
+    <tspan fill="url(#silver)">VT</tspan><tspan fill="url(#orange)">CAR</tspan>
+  </text>
+
+  <!-- Premium -->
+  <path d="M230 250 H365 M635 250 H770" stroke="url(#gold)" stroke-width="2"/>
+  <text x="500" y="260" text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="25" font-weight="600" letter-spacing="13"
+        fill="url(#gold)">PREMIUM</text>
+
+  <!-- Slogan -->
+  <text x="500" y="285" text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="13" font-weight="500" letter-spacing="5"
+        fill="#D5D8DC">MOVEMOS CONQUISTAS</text>
+</svg>
