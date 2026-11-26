@@ -1,6 +1,5 @@
-
 import { NextResponse } from "next/server";
-import { destroySession } from "@/lib/auth";
+import { destroySession } from "../../../../lib/auth";
 
 export const runtime = "nodejs";
 
@@ -10,13 +9,16 @@ export async function POST() {
 
     return NextResponse.json({
       success: true,
-      message: "Sessão encerrada com sucesso.",
+      message: "Logout realizado com sucesso.",
     });
   } catch (error) {
-    console.error("[VTCAR] Erro ao encerrar sessão:", error);
+    console.error("Erro no logout:", error);
 
     return NextResponse.json(
-      { error: "Não foi possível encerrar a sessão." },
+      {
+        success: false,
+        message: "Não foi possível encerrar a sessão.",
+      },
       { status: 500 }
     );
   }
