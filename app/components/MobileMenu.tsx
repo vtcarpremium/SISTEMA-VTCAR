@@ -9,6 +9,7 @@ import {
   MessageCircle,
   CarFront,
   ChevronRight,
+  ShieldCheck,
 } from "lucide-react";
 
 const links = [
@@ -19,6 +20,11 @@ const links = [
   { label: "Aprove seu crédito", href: "/#credito" },
   { label: "Nossa empresa", href: "/#empresa" },
   { label: "Contato", href: "/#contato" },
+  {
+    label: "Certificados e Correspondentes",
+    href: "/certificados-e-correspondentes",
+    icon: true,
+  },
 ];
 
 export default function MobileMenu() {
@@ -108,7 +114,15 @@ export default function MobileMenu() {
                     onClick={() => setIsOpen(false)}
                     className="flex min-h-12 items-center justify-between rounded-xl px-3 text-sm font-semibold text-[#123B68] transition hover:bg-[#EAF4FF] hover:text-[#1677D2]"
                   >
-                    {link.label}
+                    <span className="flex items-center gap-2">
+                      {"icon" in link && link.icon && (
+                        <ShieldCheck
+                          size={17}
+                          className="text-[#1677D2]"
+                        />
+                      )}
+                      {link.label}
+                    </span>
                     <ChevronRight size={17} className="text-[#8AA6C2]" />
                   </Link>
                 ))}
