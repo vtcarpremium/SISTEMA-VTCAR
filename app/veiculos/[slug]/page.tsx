@@ -144,9 +144,25 @@ export default async function VehiclePage({
     (image) => Boolean(image.image_url)
   );
 
-  const whatsappMessage = encodeURIComponent(
-    `Olá! Tenho interesse no veículo ${vehicle.title}. Gostaria de receber mais informações.`
-  );
+  const vehicleReference = vehicle.slug;
+
+  const whatsappMessage = [
+    "Olá! Tenho interesse neste veículo anunciado na VTCAR PREMIUM.",
+    "",
+    `Veículo: ${vehicle.title}`,
+    `Marca: ${vehicle.brand}`,
+    `Modelo: ${vehicle.model}`,
+    `Versão: ${vehicle.version || "Não informada"}`,
+    `Cor: ${vehicle.color || "Não informada"}`,
+    `Ano: ${vehicle.manufacture_year}/${vehicle.model_year}`,
+    `Quilometragem: ${Number(vehicle.mileage).toLocaleString("pt-BR")} km`,
+    `Preço anunciado: ${money(vehicle.price)}`,
+    `Referência do anúncio: ${vehicleReference}`,
+    "",
+    "Gostaria de receber mais informações sobre este veículo.",
+  ].join("\n");
+
+  const whatsappUrl = `https://wa.me/5581992968347?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
     <main className="min-h-screen bg-[#F4F7FB] text-[#10243D]">
@@ -196,13 +212,11 @@ export default async function VehiclePage({
 
         <div className="grid items-start gap-7 lg:grid-cols-[1fr_380px]">
           <section>
-            {/* GALERIA INTERATIVA */}
             <VehicleGallery
               images={validImages}
               title={vehicle.title}
             />
 
-            {/* FICHA TÉCNICA */}
             <div className="mt-6 rounded-2xl border border-[#E1E8F0] bg-white p-6">
               <h2 className="text-xl font-black text-[#071B35]">
                 Ficha técnica
@@ -259,7 +273,6 @@ export default async function VehiclePage({
               </div>
             </div>
 
-            {/* DESCRIÇÃO */}
             {vehicle.description && (
               <div className="mt-6 rounded-2xl border border-[#E1E8F0] bg-white p-6">
                 <h2 className="text-xl font-black text-[#071B35]">
@@ -273,7 +286,6 @@ export default async function VehiclePage({
             )}
           </section>
 
-          {/* INFORMAÇÕES E CONTATO */}
           <aside className="lg:sticky lg:top-6">
             <div className="rounded-2xl border border-[#E1E8F0] bg-white p-6 shadow-sm">
               <p className="text-xs font-bold uppercase tracking-widest text-[#1677D2]">
@@ -321,7 +333,7 @@ export default async function VehiclePage({
               </div>
 
               <a
-                href={`https://wa.me/?text=${whatsappMessage}`}
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1677D2] px-5 py-4 text-sm font-bold text-white transition hover:bg-[#0D5EAD]"
